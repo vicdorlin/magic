@@ -16,9 +16,9 @@ import java.util.*;
 /**
  * 用于封装一些数据的处理
  * 1，A copyTo D : [组装另一个类型的对象]：【推荐】 D copyData(Class<D> clazzD, A arg)
- * 2，List<A> copyListTo List<D> : [填充新的list]：【推荐】 List<D> copyDatas(Class<D> clazzD, List<A> args)
- * 3，List<A> copyListTo List<D> : [补充原有的list]：【推荐】 List<D> attachDatas(List<D> dogs, List<A> args)
- * 4，List<A> copyListTo List<D> : [补充原有的list（dogs为空或空集则同2）]：【推荐】 List<D> attachDatas(Class<D> clazzD, List<D> dogs, List<A> args)
+ * 2，List<A> copyListTo List<D> : [填充新的list]：【推荐】 List<D> copyList(Class<D> clazzD, List<A> args)
+ * 3，List<A> copyListTo List<D> : [补充原有的list]：【推荐】 List<D> attachList(List<D> dogs, List<A> args)
+ * 4，List<A> copyListTo List<D> : [补充原有的list（dogs为空或空集则同2）]：【推荐】 List<D> attachList(Class<D> clazzD, List<D> dogs, List<A> args)
  *
  * @author vicdor
  * @create 2016-06-15 11:17
@@ -161,7 +161,7 @@ public class DataUtils {
 
 
 
-    /*===copyDatas意味着生成=======【list数据操作】======attachDatas意味着附加，即不断往传入的dogs中添加数据===*/
+    /*===copyList意味着生成=======【list数据操作】======attachList意味着附加，即不断往传入的dogs中添加数据===*/
 
     /**
      * (若符合默认规则推荐使用)
@@ -171,8 +171,8 @@ public class DataUtils {
      * @param args A的数据集
      * @return D的数据集
      */
-    public static <D, A> List<D> copyDatas(Class<D> clazzD, List<A> args) {
-        return attachDatas(clazzD, null, args, null, null, null);
+    public static <D, A> List<D> copyList(Class<D> clazzD, List<A> args) {
+        return attachList(clazzD, null, args, null, null, null);
     }
 
     /**
@@ -181,8 +181,8 @@ public class DataUtils {
      * @param args         A的数据集
      * @param exceptKeySet 排除的字段集
      */
-    public static <D, A> List<D> copyDatas(Class<D> clazzD, List<A> args, Set<String> exceptKeySet) {
-        return attachDatas(clazzD, null, args, null, null, exceptKeySet);
+    public static <D, A> List<D> copyList(Class<D> clazzD, List<A> args, Set<String> exceptKeySet) {
+        return attachList(clazzD, null, args, null, null, exceptKeySet);
     }
 
     /**
@@ -193,8 +193,8 @@ public class DataUtils {
      * @param keys 指定的D的字段
      * @return D的数据集
      */
-    public static <D, A> List<D> copyDatas(Class<D> clzzD, List<A> args, List<String> keys) {
-        return attachDatas(clzzD, null, args, keys, null, null);
+    public static <D, A> List<D> copyList(Class<D> clzzD, List<A> args, List<String> keys) {
+        return attachList(clzzD, null, args, keys, null, null);
     }
 
     /**
@@ -205,8 +205,8 @@ public class DataUtils {
      * @param keyMap <k,v> k为D中字段名，v为A中字段名
      * @return D的数据集
      */
-    public static <D, A> List<D> copyDatas(Class<D> clzzD, List<A> args, Map<String, String> keyMap) {
-        return attachDatas(clzzD, null, args, null, keyMap, null);
+    public static <D, A> List<D> copyList(Class<D> clzzD, List<A> args, Map<String, String> keyMap) {
+        return attachList(clzzD, null, args, null, keyMap, null);
     }
 
     /**
@@ -216,8 +216,8 @@ public class DataUtils {
      * @param keyMap       <k,v> k为D中字段名，v为A中字段名
      * @param exceptKeySet 排除的字段集
      */
-    public static <D, A> List<D> copyDatas(Class<D> clzzD, List<A> args, Map<String, String> keyMap, Set<String> exceptKeySet) {
-        return attachDatas(clzzD, null, args, null, keyMap, exceptKeySet);
+    public static <D, A> List<D> copyList(Class<D> clzzD, List<A> args, Map<String, String> keyMap, Set<String> exceptKeySet) {
+        return attachList(clzzD, null, args, null, keyMap, exceptKeySet);
     }
 
     /**
@@ -229,8 +229,8 @@ public class DataUtils {
      * @param keyMap <k,v> k为D中字段名，v为A中字段名
      * @return D的数据集
      */
-    public static <D, A> List<D> copyDatas(Class<D> clazzD, List<A> args, List<String> keys, Map<String, String> keyMap) {
-        return attachDatas(clazzD, null, args, keys, keyMap, null);
+    public static <D, A> List<D> copyList(Class<D> clazzD, List<A> args, List<String> keys, Map<String, String> keyMap) {
+        return attachList(clazzD, null, args, keys, keyMap, null);
     }
 
     /**
@@ -243,8 +243,8 @@ public class DataUtils {
      * @param args A的数据集
      * @return D的数据集
      */
-    public static <D, A> List<D> attachDatas(List<D> dogs, List<A> args) {
-        return attachDatas(null, dogs, args, null, null, null);
+    public static <D, A> List<D> attachList(List<D> dogs, List<A> args) {
+        return attachList(null, dogs, args, null, null, null);
     }
 
     /**
@@ -255,8 +255,8 @@ public class DataUtils {
      * @param args         A的数据集
      * @param exceptKeySet 排除的字段集
      */
-    public static <D, A> List<D> attachDatas(List<D> dogs, List<A> args, Set<String> exceptKeySet) {
-        return attachDatas(null, dogs, args, null, null, exceptKeySet);
+    public static <D, A> List<D> attachList(List<D> dogs, List<A> args, Set<String> exceptKeySet) {
+        return attachList(null, dogs, args, null, null, exceptKeySet);
     }
 
     /**
@@ -265,8 +265,8 @@ public class DataUtils {
      * 要求：相同的字段名有相同的数据类型（可解决）
      * 说明，dogs可以为空或空集
      */
-    public static <D, A> List<D> attachDatas(Class<D> clazzD, List<D> dogs, List<A> args) {
-        return attachDatas(clazzD, dogs, args, null, null, null);
+    public static <D, A> List<D> attachList(Class<D> clazzD, List<D> dogs, List<A> args) {
+        return attachList(clazzD, dogs, args, null, null, null);
     }
 
     /**
@@ -275,8 +275,8 @@ public class DataUtils {
      *
      * @param exceptKeySet 排除的字段
      */
-    public static <D, A> List<D> attachDatas(Class<D> clazzD, List<D> dogs, List<A> args, Set<String> exceptKeySet) {
-        return attachDatas(clazzD, dogs, args, null, null, exceptKeySet);
+    public static <D, A> List<D> attachList(Class<D> clazzD, List<D> dogs, List<A> args, Set<String> exceptKeySet) {
+        return attachList(clazzD, dogs, args, null, null, exceptKeySet);
     }
 
     /**
@@ -285,9 +285,9 @@ public class DataUtils {
      * @param dList       操作集合
      * @param eraseKeySet 要擦除后期数据的字段
      */
-    public static <D> List<D> eraseDatas(List<D> dList, Set<String> eraseKeySet) {
+    public static <D> List<D> eraseList(List<D> dList, Set<String> eraseKeySet) {
         if (dList == null || dList.size() <= 0 || eraseKeySet == null || eraseKeySet.size() <= 0) return dList;
-        return (List<D>) attachDatas(dList.get(0).getClass(), null, dList, null, null, eraseKeySet);
+        return (List<D>) attachList(dList.get(0).getClass(), null, dList, null, null, eraseKeySet);
     }
 
     /**
@@ -295,29 +295,29 @@ public class DataUtils {
      * 要求：相同的字段名有相同的数据类型（可解决）
      * 要求：keys当有数据
      */
-    public static <D, A> List<D> attachDatas(List<D> dogs, List<A> args, List<String> keys) {
-        return attachDatas(null, dogs, args, keys, null, null);
+    public static <D, A> List<D> attachList(List<D> dogs, List<A> args, List<String> keys) {
+        return attachList(null, dogs, args, keys, null, null);
     }
 
     /**
      * 有map无keys有clazzD
      */
-    public static <D, A> List<D> attachDatas(Class<D> clazzD, List<D> dogs, List<A> args, Map<String, String> keyMap) {
-        return attachDatas(clazzD, dogs, args, null, keyMap, null);
+    public static <D, A> List<D> attachList(Class<D> clazzD, List<D> dogs, List<A> args, Map<String, String> keyMap) {
+        return attachList(clazzD, dogs, args, null, keyMap, null);
     }
 
     /**
      * 有map无keys有clazzD带exceptKeySet
      */
-    public static <D, A> List<D> attachDatas(Class<D> clazzD, List<D> dogs, List<A> args, Map<String, String> keyMap, Set<String> exceptKeySet) {
-        return attachDatas(clazzD, dogs, args, null, keyMap, exceptKeySet);
+    public static <D, A> List<D> attachList(Class<D> clazzD, List<D> dogs, List<A> args, Map<String, String> keyMap, Set<String> exceptKeySet) {
+        return attachList(clazzD, dogs, args, null, keyMap, exceptKeySet);
     }
 
     /**
      * 有map有keys无clazzD
      */
-    public static <D, A> List<D> attachDatas(List<D> dogs, List<A> args, List<String> keys, Map<String, String> keyMap) {
-        return attachDatas(null, dogs, args, keys, keyMap, null);
+    public static <D, A> List<D> attachList(List<D> dogs, List<A> args, List<String> keys, Map<String, String> keyMap) {
+        return attachList(null, dogs, args, keys, keyMap, null);
     }
 
     /**
@@ -335,7 +335,7 @@ public class DataUtils {
      * @param <A>    现提供数据的集合元素的数据类型
      * @return 处理后的D类型数据集合
      */
-    public static <D, A> List<D> attachDatas(Class<D> clazzD, List<D> dogs, List<A> args, List<String> keys, Map<String, String> keyMap, Set<String> exceptKeySet) {
+    public static <D, A> List<D> attachList(Class<D> clazzD, List<D> dogs, List<A> args, List<String> keys, Map<String, String> keyMap, Set<String> exceptKeySet) {
         if (args == null || args.size() <= 0) return dogs;
 
         //1,如果未提供keys则默认使用D类所有字段名
