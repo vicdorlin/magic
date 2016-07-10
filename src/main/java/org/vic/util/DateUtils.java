@@ -2,6 +2,7 @@ package org.vic.util;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
+import org.vic.enums.DateFormatEnum;
 
 import java.util.Date;
 
@@ -9,15 +10,6 @@ import java.util.Date;
  * Created by Vicdor on 2016-05-07-0007.
  */
 public class DateUtils {
-    /**
-     * 默认时间格式
-     */
-    public static final String DATE_DEFAULT = "yyyy-MM-dd HH:mm:ss";
-
-    public static final String DATE_YYYYMMDD = "yyyyMMdd";
-    public static final String DATE_YYYY_MM = "yyyy-MM";
-    public static final String DATE_YYYY_MM_DD = "yyyy-MM-dd";
-    public static final String DATE_M_D = "M-d";
 
     /**
      * 获取当前时间指定格式时间字符串
@@ -33,7 +25,7 @@ public class DateUtils {
      * @return 默认格式字符串
      */
     public static String getDateStr(){
-        return getDateStr(DATE_DEFAULT);
+        return getDateStr(DateFormatEnum.DEFAULT.getValue());
     }
 
     /**
@@ -42,7 +34,7 @@ public class DateUtils {
      * @return 默认格式的时间字符串
      */
     public static String getDateStr(Date date){
-        return new DateTime(date).toString(DATE_DEFAULT);
+        return new DateTime(date).toString(DateFormatEnum.DEFAULT.getValue());
     }
 
     /**

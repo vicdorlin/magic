@@ -1,6 +1,11 @@
 package org.vic.util;
 
+import com.alibaba.fastjson.JSON;
+import org.vic.enums.DateFormatEnum;
+
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -73,4 +78,18 @@ public class CommonUtils {
         return collection != null && collection.size() > 0;
     }
 
+    /**
+     * 可以理解为万用toString
+     *
+     * @param t
+     * @param <T>
+     * @return
+     */
+    public static <T> String transferToString(T t) {
+        if (t == null) return null;
+        if (t instanceof String) return (String) t;
+        if (t instanceof Date) return new SimpleDateFormat(DateFormatEnum.DEFAULT.getValue()).format(t);
+        if (t instanceof Number || t instanceof Character || t instanceof Boolean) return String.valueOf(t);
+        return JSON.toJSONString(t);
+    }
 }
