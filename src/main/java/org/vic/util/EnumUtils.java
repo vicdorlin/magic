@@ -41,7 +41,6 @@ public class EnumUtils {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
             }
         }
         return null;

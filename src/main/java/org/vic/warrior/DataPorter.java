@@ -1,8 +1,6 @@
 package org.vic.warrior;
 
 import org.vic.enums.DateFormatEnum;
-import org.vic.exception.FailToCreatePropertyDescriptorException;
-import org.vic.exception.ParameterTypeMismatchException;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -25,15 +23,30 @@ import static org.vic.util.CommonUtils.transferToString;
  * @create 2016-07-11 01:42
  */
 public class DataPorter {
+    private static DataPorter PORTER = new DataPorter();
+
+    private DataPorter() {
+    }
+
+    protected DataPorter(boolean forExtends) {
+    }
+
+    private static class PorterHolder {
+        private static final DataPorter PORTER = new DataPorter();
+    }
+
+    public static DataPorter getPorter() {
+        return PorterHolder.PORTER;
+    }
 
     /**
      * 清除对象个别字段的数据，重置为初始化值
      *
-     * @param eraseKeySet 要清除数据的字段集
+     * @param eraseFieldsSet 要清除数据的字段集
      */
-    public <D> D eraseData(D d, Set<String> eraseKeySet) {
-        if (d == null || eraseKeySet == null || eraseKeySet.size() <= 0) return d;
-        return (D) copyData(d.getClass(), d, eraseKeySet);
+    public <D> D eraseData(D d, Set<String> eraseFieldsSet) {
+        if (d == null || eraseFieldsSet == null || eraseFieldsSet.size() <= 0) return d;
+        return (D) copyData(d.getClass(), d, eraseFieldsSet);
     }
 
     /**
@@ -43,280 +56,278 @@ public class DataPorter {
      * 则推荐使用）
      * 要求字段名称和类型一一对应
      */
-    public <D, A> D copyData(Class<D> clazzD, A arg) {
-        return copyData(clazzD, arg, null, null, null);
+    public <D, A> D copyData(Class<D> clazzD, A fromData) {
+        return copyData(clazzD, fromData, null, null, null);
     }
 
     /**
      * 加了个需要排除的字段集集
      *
-     * @param exceptKeySet 排除的字段集
+     * @param exceptFieldsSet 排除的字段集
      */
-    public <D, A> D copyData(Class<D> clazzD, A arg, Set<String> exceptKeySet) {
-        return copyData(clazzD, arg, null, null, exceptKeySet);
+    public <D, A> D copyData(Class<D> clazzD, A fromData, Set<String> exceptFieldsSet) {
+        return copyData(clazzD, fromData, null, null, exceptFieldsSet);
     }
 
     /**
      * 使用指定的keys中的D字段
      */
-    public <D, A> D copyData(Class<D> clazzD, A arg, List<String> keys) {
-        return copyData(clazzD, arg, keys, null, null);
+    public <D, A> D copyData(Class<D> clazzD, A fromData, List<String> fieldNames) {
+        return copyData(clazzD, fromData, fieldNames, null, null);
     }
 
     /**
      * 部分字段使用keyMap指定的关系对应起来
      *
-     * @param keyMap <k,v> k:D中字段 v:A中字段
+     * @param correspondingFieldsMap <k,v> k:D中字段 v:A中字段
      */
-    public <D, A> D copyData(Class<D> clazzD, A arg, Map<String, String> keyMap) {
-        return copyData(clazzD, arg, null, keyMap, null);
+    public <D, A> D copyData(Class<D> clazzD, A fromData, Map<String, String> correspondingFieldsMap) {
+        return copyData(clazzD, fromData, null, correspondingFieldsMap, null);
     }
 
     /**
      * 部分字段使用keyMap指定的关系对应起来
      *
-     * @param keyMap       <k,v> k:D中字段 v:A中字段
-     * @param exceptKeySet 排除的字段集
+     * @param correspondingFieldsMap <k,v> k:D中字段 v:A中字段
+     * @param exceptFieldsSet        排除的字段集
      */
-    public <D, A> D copyData(Class<D> clazzD, A arg, Map<String, String> keyMap, Set<String> exceptKeySet) {
-        return copyData(clazzD, arg, null, keyMap, exceptKeySet);
+    public <D, A> D copyData(Class<D> clazzD, A fromData, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
+        return copyData(clazzD, fromData, null, correspondingFieldsMap, exceptFieldsSet);
     }
 
     /**
-     * 将arg对象按照keys指定的字段,根据名称一一对应（部分按照keyMap指定对应）copy为一个新的D类型对象
+     * 将fromData对象按照keys指定的字段,根据名称一一对应（部分按照keyMap指定对应）copy为一个新的D类型对象
      *
-     * @param clazzD 要生成的对象的类型
-     * @param arg    数据来源
-     * @param keys   指定要copy数据的字段名
-     * @param keyMap <k,v> k:D中字段 v:A中字段
+     * @param clazzD                 要生成的对象的类型
+     * @param fromData               数据来源
+     * @param fieldNames             指定要copy数据的字段名
+     * @param correspondingFieldsMap <k,v> k:D中字段 v:A中字段
      */
-    public <D, A> D copyData(Class<D> clazzD, A arg, List<String> keys, Map<String, String> keyMap, Set<String> exceptKeySet) {
-        if (arg == null || clazzD == null) return null;
+    public <D, A> D copyData(Class<D> clazzD, A fromData, List<String> fieldNames, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
+        if (fromData == null || clazzD == null) return null;
 
         //1,如果未提供keys则默认使用D类所有字段名
-        if (keys == null || keys.size() == 0) {
+        if (fieldNames == null || fieldNames.size() == 0) {
             Field[] dFields = clazzD.getDeclaredFields();
-            keys = new ArrayList();
+            fieldNames = new ArrayList();
             for (Field field : dFields) {
-                keys.add(field.getName());
+                fieldNames.add(field.getName());
             }
         }
 
         //用于存储收集的问题key
-        Set<String> errorKeySet = new HashSet();
-        Class clazzA = arg.getClass();
+        Set<String> errorFieldsSet = new HashSet();
+        Class clazzA = fromData.getClass();
 
-        if (errorKeySet.size() > 0)
-            throw new FailToCreatePropertyDescriptorException("Fail to create PropertyDescriptor for errorKeySet:" + transferToString(errorKeySet));
-        return (D) compose(arg, clazzD, clazzA, keys, keyMap, exceptKeySet, errorKeySet);
+        if (errorFieldsSet.size() > 0) dealWithErrorFieldsSet(errorFieldsSet);
+        return (D) compose(fromData, clazzD, clazzA, fieldNames, correspondingFieldsMap, exceptFieldsSet, errorFieldsSet);
     }
 
-    /*===copyList意味着生成=======【list数据操作】======attachList意味着附加，即不断往传入的dogs中添加数据===*/
+    /*===copyList意味着生成=======【list数据操作】======attachList意味着附加，即不断往传入的list中添加数据===*/
 
     /**
      * (若符合默认规则推荐使用)
      * 将A的数据集，按照名称直接对应copy为一个新的D的数据集
      * 要求：相同的字段名有相同的数据类型（可解决）
      *
-     * @param args A的数据集
+     * @param fromList A的数据集
      * @return D的数据集
      */
-    public <D, A> List<D> copyList(Class<D> clazzD, List<A> args) {
-        return attachList(clazzD, null, args, null, null, null);
+    public <D, A> List<D> copyList(Class<D> clazzD, List<A> fromList) {
+        return attachList(clazzD, null, fromList, null, null, null);
     }
 
     /**
      * 将A的数据集，按照名称直接对应copy为一个新的D的数据集
      *
-     * @param args         A的数据集
-     * @param exceptKeySet 排除的字段集
+     * @param fromList        A的数据集
+     * @param exceptFieldsSet 排除的字段集
      */
-    public <D, A> List<D> copyList(Class<D> clazzD, List<A> args, Set<String> exceptKeySet) {
-        return attachList(clazzD, null, args, null, null, exceptKeySet);
+    public <D, A> List<D> copyList(Class<D> clazzD, List<A> fromList, Set<String> exceptFieldsSet) {
+        return attachList(clazzD, null, fromList, null, null, exceptFieldsSet);
     }
 
     /**
      * 将A的数据集，按照keys中指定的D的字段，依据名称直接对应copy为一个新的D的数据集
      * 要求：相同的字段名有相同的数据类型（可解决）
      *
-     * @param args A的数据集
-     * @param keys 指定的D的字段
+     * @param fromList   A的数据集
+     * @param fieldNames 指定的D的字段
      * @return D的数据集
      */
-    public <D, A> List<D> copyList(Class<D> clzzD, List<A> args, List<String> keys) {
-        return attachList(clzzD, null, args, keys, null, null);
+    public <D, A> List<D> copyList(Class<D> clzzD, List<A> fromList, List<String> fieldNames) {
+        return attachList(clzzD, null, fromList, fieldNames, null, null);
     }
 
     /**
      * 将A的数据集按照字段名称直接对应(部分字段按照keyMap中指定的关系对应)copy为一个新的D的数据集
      * 要求：相同的字段名有相同的数据类型（可解决）
      *
-     * @param args   A的数据集
-     * @param keyMap <k,v> k为D中字段名，v为A中字段名
+     * @param fromList               A的数据集
+     * @param correspondingFieldsMap <k,v> k为D中字段名，v为A中字段名
      * @return D的数据集
      */
-    public <D, A> List<D> copyList(Class<D> clzzD, List<A> args, Map<String, String> keyMap) {
-        return attachList(clzzD, null, args, null, keyMap, null);
+    public <D, A> List<D> copyList(Class<D> clzzD, List<A> fromList, Map<String, String> correspondingFieldsMap) {
+        return attachList(clzzD, null, fromList, null, correspondingFieldsMap, null);
     }
 
     /**
      * 将A的数据集按照字段名称直接对应(部分字段按照keyMap中指定的关系对应)copy为一个新的D的数据集
      *
-     * @param args         A的数据集
-     * @param keyMap       <k,v> k为D中字段名，v为A中字段名
-     * @param exceptKeySet 排除的字段集
+     * @param fromList               A的数据集
+     * @param correspondingFieldsMap <k,v> k为D中字段名，v为A中字段名
+     * @param exceptFieldsSet        排除的字段集
      */
-    public <D, A> List<D> copyList(Class<D> clzzD, List<A> args, Map<String, String> keyMap, Set<String> exceptKeySet) {
-        return attachList(clzzD, null, args, null, keyMap, exceptKeySet);
+    public <D, A> List<D> copyList(Class<D> clzzD, List<A> fromList, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
+        return attachList(clzzD, null, fromList, null, correspondingFieldsMap, exceptFieldsSet);
     }
 
     /**
      * 将A的数据集，按照keys中指定的D的字段，按照字段名称直接对应(部分字段按照keyMap中指定的关系对应)copy为一个新的D的数据集
      * 要求：相同的字段名有相同的数据类型（可解决）
      *
-     * @param args   A的数据集
-     * @param keys   指定的D的字段
-     * @param keyMap <k,v> k为D中字段名，v为A中字段名
+     * @param fromList               A的数据集
+     * @param fieldNames             指定的D的字段
+     * @param correspondingFieldsMap <k,v> k为D中字段名，v为A中字段名
      * @return D的数据集
      */
-    public <D, A> List<D> copyList(Class<D> clazzD, List<A> args, List<String> keys, Map<String, String> keyMap) {
-        return attachList(clazzD, null, args, keys, keyMap, null);
+    public <D, A> List<D> copyList(Class<D> clazzD, List<A> fromList, List<String> fieldNames, Map<String, String> correspondingFieldsMap) {
+        return attachList(clazzD, null, fromList, fieldNames, correspondingFieldsMap, null);
     }
 
     /**
-     * （dogs有数据后，若符合默认规则，推荐使用）
-     * 将A的数据集，按照字段对应关系copy添加到D的数据集，以丰富dogs
+     * （list有数据后，若符合默认规则，推荐使用）
+     * 将A的数据集，按照字段对应关系copy添加到D的数据集，以丰富list
      * 要求：相同的字段名有相同的数据类型（可解决）
-     * 要求：dogs中至少要有一条数据
+     * 要求：list中至少要有一条数据
      *
-     * @param dogs D的数据集
-     * @param args A的数据集
+     * @param list     D的数据集
+     * @param fromList A的数据集
      * @return D的数据集
      */
-    public <D, A> List<D> attachList(List<D> dogs, List<A> args) {
-        return attachList(null, dogs, args, null, null, null);
+    public <D, A> List<D> attachList(List<D> list, List<A> fromList) {
+        return attachList(null, list, fromList, null, null, null);
     }
 
     /**
-     * 将A的数据集，按照字段对应关系copy添加到D的数据集，以丰富dogs
-     * 要求：dogs中至少要有一条数据
+     * 将A的数据集，按照字段对应关系copy添加到D的数据集，以丰富list
+     * 要求：list中至少要有一条数据
      *
-     * @param dogs         D的数据集
-     * @param args         A的数据集
-     * @param exceptKeySet 排除的字段集
+     * @param list            D的数据集
+     * @param fromList        A的数据集
+     * @param exceptFieldsSet 排除的字段集
      */
-    public <D, A> List<D> attachList(List<D> dogs, List<A> args, Set<String> exceptKeySet) {
-        return attachList(null, dogs, args, null, null, exceptKeySet);
+    public <D, A> List<D> attachList(List<D> list, List<A> fromList, Set<String> exceptFieldsSet) {
+        return attachList(null, list, fromList, null, null, exceptFieldsSet);
     }
 
     /**
      * （若符合默认规则，推荐使用）
-     * 将A的数据集，按照字段对应关系copy添加到D的数据集，以丰富dogs
+     * 将A的数据集，按照字段对应关系copy添加到D的数据集，以丰富list
      * 要求：相同的字段名有相同的数据类型（可解决）
-     * 说明，dogs可以为空或空集
+     * 说明，list可以为空或空集
      */
-    public <D, A> List<D> attachList(Class<D> clazzD, List<D> dogs, List<A> args) {
-        return attachList(clazzD, dogs, args, null, null, null);
+    public <D, A> List<D> attachList(Class<D> clazzD, List<D> list, List<A> fromList) {
+        return attachList(clazzD, list, fromList, null, null, null);
     }
 
     /**
-     * 将A的数据集，按照字段对应关系copy添加到D的数据集，以丰富dogs
-     * 说明，dogs可以为空或空集
+     * 将A的数据集，按照字段对应关系copy添加到D的数据集，以丰富list
+     * 说明，list可以为空或空集
      *
-     * @param exceptKeySet 排除的字段
+     * @param exceptFieldsSet 排除的字段
      */
-    public <D, A> List<D> attachList(Class<D> clazzD, List<D> dogs, List<A> args, Set<String> exceptKeySet) {
-        return attachList(clazzD, dogs, args, null, null, exceptKeySet);
+    public <D, A> List<D> attachList(Class<D> clazzD, List<D> list, List<A> fromList, Set<String> exceptFieldsSet) {
+        return attachList(clazzD, list, fromList, null, null, exceptFieldsSet);
     }
 
     /**
      * 擦除list中所有元素中指定的几个字段
      *
      * @param dList       操作集合
-     * @param eraseKeySet 要擦除后期数据的字段
+     * @param eraseFieldsSet 要擦除后期数据的字段
      */
-    public <D> List<D> eraseList(List<D> dList, Set<String> eraseKeySet) {
-        if (dList == null || dList.size() <= 0 || eraseKeySet == null || eraseKeySet.size() <= 0) return dList;
-        return (List<D>) attachList(dList.get(0).getClass(), null, dList, null, null, eraseKeySet);
+    public <D> List<D> eraseList(List<D> dList, Set<String> eraseFieldsSet) {
+        if (dList == null || dList.size() <= 0 || eraseFieldsSet == null || eraseFieldsSet.size() <= 0) return dList;
+        return (List<D>) attachList(dList.get(0).getClass(), null, dList, null, null, eraseFieldsSet);
     }
 
     /**
-     * 将A的数据集，按照keys中指定的D的字段，依据名称直接对应copy添加到D的数据集，以丰富dogs
+     * 将A的数据集，按照keys中指定的D的字段，依据名称直接对应copy添加到D的数据集，以丰富list
      * 要求：相同的字段名有相同的数据类型（可解决）
      * 要求：keys当有数据
      */
-    public <D, A> List<D> attachList(List<D> dogs, List<A> args, List<String> keys) {
-        return attachList(null, dogs, args, keys, null, null);
+    public <D, A> List<D> attachList(List<D> list, List<A> fromList, List<String> fieldNames) {
+        return attachList(null, list, fromList, fieldNames, null, null);
     }
 
     /**
      * 有map无keys有clazzD
      */
-    public <D, A> List<D> attachList(Class<D> clazzD, List<D> dogs, List<A> args, Map<String, String> keyMap) {
-        return attachList(clazzD, dogs, args, null, keyMap, null);
+    public <D, A> List<D> attachList(Class<D> clazzD, List<D> list, List<A> fromList, Map<String, String> correspondingFieldsMap) {
+        return attachList(clazzD, list, fromList, null, correspondingFieldsMap, null);
     }
 
     /**
      * 有map无keys有clazzD带exceptKeySet
      */
-    public <D, A> List<D> attachList(Class<D> clazzD, List<D> dogs, List<A> args, Map<String, String> keyMap, Set<String> exceptKeySet) {
-        return attachList(clazzD, dogs, args, null, keyMap, exceptKeySet);
+    public <D, A> List<D> attachList(Class<D> clazzD, List<D> list, List<A> fromList, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
+        return attachList(clazzD, list, fromList, null, correspondingFieldsMap, exceptFieldsSet);
     }
 
     /**
      * 有map有keys无clazzD
      */
-    public <D, A> List<D> attachList(List<D> dogs, List<A> args, List<String> keys, Map<String, String> keyMap) {
-        return attachList(null, dogs, args, keys, keyMap, null);
+    public <D, A> List<D> attachList(List<D> list, List<A> fromList, List<String> fieldNames, Map<String, String> correspondingFieldsMap) {
+        return attachList(null, list, fromList, fieldNames, correspondingFieldsMap, null);
     }
 
     /**
-     * 将A类型的集合args中的部分数据(通过keys和keyMap指定)添加进入D类型的集合dogs中
+     * 将A类型的集合fromList中的部分数据(通过fieldNames和keyMap指定)添加进入D类型的集合list中
      * 注：   0，D，A都应符合标准的bean规范（无视serialVersionUID）
-     * 1，clazzD、dogs、keys 至少应该有一个是有数据(非空)的，否则调用本方法无意义
-     * 这里的数据依据，keys的优先级最高，其次为clazzD，再次为dogs中的元素；
+     * 1，clazzD、list、fieldNames 至少应该有一个是有数据(非空)的，否则调用本方法无意义
+     * 这里的数据依据，keys的优先级最高，其次为clazzD，再次为list中的元素；
      *
-     * @param clazzD 加这个参数的目的是如若dogs无值，那么我将无法获取它，而我又存在需要通过它获取到keys的状况
-     * @param dogs   指代我们要合成的数据集
-     * @param args   现有的数据集，要将<A>args中的数据植入<D>dogs
-     * @param keys   指定D类中哪些字段参与数据合成
-     * @param keyMap <k,v> 用于处理两个类因字段名不同导致的尴尬 k:应当为keys中存在的属于D的字段名，v：应当为A中存在的字段名
-     * @param <D>    要合成的数据类型
-     * @param <A>    现提供数据的集合元素的数据类型
+     * @param clazzD                 加这个参数的目的是如若list无值，那么我将无法获取它，而我又存在需要通过它获取到keys的状况
+     * @param list                   指代我们要合成的数据集
+     * @param fromList               现有的数据集，要将<A>fromList中的数据植入<D>list
+     * @param fieldNames             指定D类中哪些字段参与数据合成
+     * @param correspondingFieldsMap <k,v> 用于处理两个类因字段名不同导致的尴尬 k:应当为keys中存在的属于D的字段名，v：应当为A中存在的字段名
+     * @param <D>                    要合成的数据类型
+     * @param <A>                    现提供数据的集合元素的数据类型
      * @return 处理后的D类型数据集合
      */
-    public <D, A> List<D> attachList(Class<D> clazzD, List<D> dogs, List<A> args, List<String> keys, Map<String, String> keyMap, Set<String> exceptKeySet) {
-        if (args == null || args.size() <= 0) return dogs;
+    public <D, A> List<D> attachList(Class<D> clazzD, List<D> list, List<A> fromList, List<String> fieldNames, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
+        if (fromList == null || fromList.size() <= 0) return list;
 
         //1,如果未提供keys则默认使用D类所有字段名
-        if (keys == null || keys.size() == 0) {
+        if (fieldNames == null || fieldNames.size() == 0) {
             Field[] dFields;
             if (clazzD == null) {
-                //keys没有，classD有咩有，dogs也没点东西，玩毛...
-                if (dogs == null || dogs.size() <= 0) return dogs;
-                //dogs中有数据，则通过dogs中的一条数据来获取D类字段集
-                dFields = dogs.get(0).getClass().getDeclaredFields();
+                //keys没有，classD有咩有，list也没点东西，玩毛...
+                if (list == null || list.size() <= 0) return list;
+                //list中有数据，则通过list中的一条数据来获取D类字段集
+                dFields = list.get(0).getClass().getDeclaredFields();
             } else {
                 dFields = clazzD.getDeclaredFields();
             }
-            keys = new ArrayList();
+            fieldNames = new ArrayList();
             for (Field field : dFields) {
-                keys.add(field.getName());
+                fieldNames.add(field.getName());
             }
         }
 
-        if (dogs == null) dogs = new ArrayList();
+        if (list == null) list = new ArrayList();
 
         //用于存储收集的问题key
-        Set<String> errorKeySet = new HashSet();
-        //2,遍历args
-        for (A a : args) {
+        Set<String> errorFieldsSet = new HashSet();
+        //2,遍历fromList
+        for (A a : fromList) {
             Class clazzA = a.getClass();
-            dogs.add((D) compose(a, clazzD, clazzA, keys, keyMap, exceptKeySet, errorKeySet));
+            list.add((D) compose(a, clazzD, clazzA, fieldNames, correspondingFieldsMap, exceptFieldsSet, errorFieldsSet));
         }
-        if (errorKeySet.size() > 0)
-            throw new FailToCreatePropertyDescriptorException("Fail to create PropertyDescriptor for errorKeySet:" + transferToString(errorKeySet));
-        return dogs;
+        if (errorFieldsSet.size() > 0) dealWithErrorFieldsSet(errorFieldsSet);
+        return list;
     }
 
     private <D, A> D compose(A a, Class<D> clazzD, Class<A> clazzA, List<String> fieldNames, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet, Set<String> errorFieldsSet) {
@@ -344,8 +355,8 @@ public class DataPorter {
             try {
                 transferFieldValue(d, clazzD, a, clazzA, fieldName, fieldNameOfA);
             } catch (IntrospectionException e) {
-                    /*创建PropertyDescriptor失败，指定字段名（fieldName）不存在于相应类中
-                    或无其对应getters(boolean字段可以为is开头) or setters*/
+                /*创建PropertyDescriptor失败，指定字段名（fieldName）不存在于相应类中
+                或无其对应getters(boolean字段可以为is开头) or setters*/
                 if (!errorFieldsSet.contains(fieldName)) {
                     errorFieldsSet.add(fieldName);
                 }
@@ -354,7 +365,7 @@ public class DataPorter {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
                 /*参数类型不匹配*/
-                throw new ParameterTypeMismatchException("parameter type mismatch. field name:" + fieldName, e);
+                dealWithErrorFieldName(e,fieldName);
             }
         }
         return d;
@@ -383,6 +394,24 @@ public class DataPorter {
                 dSetter.invoke(d, transferToDate(fieldValueA));
             }
         }
+    }
+
+    /**
+     * cover it in the subclasses to deal with errorFieldName
+     * always something
+     */
+    protected void dealWithErrorFieldName(IllegalAccessException e,String fieldName) {
+        //LOGGER.info("1002 === 参数类型不匹配 === fieldName:{}", fieldName);
+        e.printStackTrace();
+    }
+
+    /**
+     * cover it in the subclasses to deal with errorFieldsSet
+     * which may always for show error fields on server logs
+     */
+    protected void dealWithErrorFieldsSet(Set<String> errorFieldsSet) {
+        //LOGGER.info("1000 === 创建PropertyDescriptor失败 === errorFieldsSet:{}", errorFieldsSet);
+        System.out.println("=== errorFieldsSet === " + transferToString(errorFieldsSet));
     }
 
     /**
@@ -466,4 +495,5 @@ public class DataPorter {
         }
         return map;
     }
+
 }
