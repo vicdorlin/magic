@@ -243,7 +243,7 @@ public class DataPorter {
     /**
      * 擦除list中所有元素中指定的几个字段
      *
-     * @param dList       操作集合
+     * @param dList          操作集合
      * @param eraseFieldsSet 要擦除后期数据的字段
      */
     public <D> List<D> eraseList(List<D> dList, Set<String> eraseFieldsSet) {
@@ -325,7 +325,11 @@ public class DataPorter {
             Class clazzA = a.getClass();
             list.add((D) compose(a, clazzD, clazzA, fieldNames, correspondingFieldsMap, exceptFieldsSet, errorFieldsSet));
         }
-        if (errorFieldsSet.size() > 0) dealWithErrorFieldsSet(errorFieldsSet);
+        if (errorFieldsSet.size() > 0) {
+            //获取当前执行的方法名字
+            //String methodName = new Throwable().getStackTrace()[0].getMethodName();
+            dealWithErrorFieldsSet(errorFieldsSet);
+        }
         return list;
     }
 
@@ -363,8 +367,8 @@ public class DataPorter {
             } catch (InvocationTargetException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
-                /*参数类型不匹配*/
-                dealWithErrorFieldName(e,fieldName);
+                /*方法访问异常*/
+                e.printStackTrace();
             }
         }
         return d;
@@ -393,15 +397,6 @@ public class DataPorter {
                 dSetter.invoke(d, transferToDate(fieldValueA));
             }
         }
-    }
-
-    /**
-     * cover it in the subclasses to deal with errorFieldName
-     * always something
-     */
-    protected void dealWithErrorFieldName(IllegalAccessException e,String fieldName) {
-        //LOGGER.info("1002 === 参数类型不匹配 === fieldName:{}", fieldName);
-        e.printStackTrace();
     }
 
     /**
