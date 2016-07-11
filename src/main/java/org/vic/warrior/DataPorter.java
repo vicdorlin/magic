@@ -23,7 +23,6 @@ import static org.vic.util.CommonUtils.transferToString;
  * @create 2016-07-11 01:42
  */
 public class DataPorter {
-    private static DataPorter PORTER = new DataPorter();
 
     private DataPorter() {
     }
