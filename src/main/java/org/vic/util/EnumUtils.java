@@ -36,8 +36,7 @@ public class EnumUtils {
                 try {
                     Field field = enumConstant.getClass().getDeclaredField(fieldName);
                     field.setAccessible(true);
-                    if (value.equals(field.get(enumConstant)))
-                        return enumConstant;
+                    if (value.equals(field.get(enumConstant))) return enumConstant;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
