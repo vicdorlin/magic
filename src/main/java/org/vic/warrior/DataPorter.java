@@ -50,7 +50,7 @@ public class DataPorter {
 
     /**
      * （若符合要求（即存在数据传递关系的类之间相同字段名对应字段类型也相同，
-     * 且对参与数据传递的字段没有其他限制（即无需keys），
+     * 且对参与数据传递的字段没有其他限制（即无需fieldNames），
      * 并且只进行同名字段传递(即无需keyMap)），
      * 则推荐使用）
      * 要求字段名称和类型一一对应
@@ -69,7 +69,7 @@ public class DataPorter {
     }
 
     /**
-     * 使用指定的keys中的D字段
+     * 使用指定的fieldNames中的D字段
      */
     public <D, A> D copyData(Class<D> clazzD, A fromData, List<String> fieldNames) {
         return copyData(clazzD, fromData, fieldNames, null, null);
@@ -95,23 +95,20 @@ public class DataPorter {
     }
 
     /**
-     * 将fromData对象按照keys指定的字段,根据名称一一对应（部分按照keyMap指定对应）copy为一个新的D类型对象
+     * 将fromData对象按照fieldNames指定的字段,根据名称一一对应（部分按照keyMap指定对应）copy为一个新的D类型对象
      *
      * @param clazzD                 要生成的对象的类型
      * @param fromData               数据来源
-     * @param fieldNames             指定要copy数据的字段名
+     * @param fieldNames             指定要copy数据的字段名（为null默认D字段名list,size为0默认A字段名list）
      * @param correspondingFieldsMap <k,v> k:D中字段 v:A中字段
      */
     public <D, A> D copyData(Class<D> clazzD, A fromData, List<String> fieldNames, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
         if (fromData == null || clazzD == null) return null;
 
-        //1,如果未提供keys则默认使用D类所有字段名
-        if (fieldNames == null || fieldNames.size() == 0) {
-            Field[] dFields = clazzD.getDeclaredFields();
-            fieldNames = new ArrayList();
-            for (Field field : dFields) {
-                fieldNames.add(field.getName());
-            }
+        if (fieldNames == null) {               //1,如果未提供fieldNames则默认使用D类所有字段名
+            fieldNames = extractFieldNames(clazzD);
+        }else if(fieldNames.size() == 0){       //2,如果提供内容为空的fieldNames,则默认使用A类型所有字段名
+            fieldNames = extractFieldNames(fromData.getClass());
         }
 
         //用于存储收集的问题key
@@ -147,7 +144,7 @@ public class DataPorter {
     }
 
     /**
-     * 将A的数据集，按照keys中指定的D的字段，依据名称直接对应copy为一个新的D的数据集
+     * 将A的数据集，按照fieldNames中指定的D的字段，依据名称直接对应copy为一个新的D的数据集
      * 要求：相同的字段名有相同的数据类型（可解决）
      *
      * @param fromList   A的数据集
@@ -182,7 +179,7 @@ public class DataPorter {
     }
 
     /**
-     * 将A的数据集，按照keys中指定的D的字段，按照字段名称直接对应(部分字段按照keyMap中指定的关系对应)copy为一个新的D的数据集
+     * 将A的数据集，按照fieldNames中指定的D的字段，按照字段名称直接对应(部分字段按照keyMap中指定的关系对应)copy为一个新的D的数据集
      * 要求：相同的字段名有相同的数据类型（可解决）
      *
      * @param fromList               A的数据集
@@ -252,30 +249,30 @@ public class DataPorter {
     }
 
     /**
-     * 将A的数据集，按照keys中指定的D的字段，依据名称直接对应copy添加到D的数据集，以丰富list
+     * 将A的数据集，按照fieldNames中指定的D的字段，依据名称直接对应copy添加到D的数据集，以丰富list
      * 要求：相同的字段名有相同的数据类型（可解决）
-     * 要求：keys当有数据
+     * 要求：fieldNames当有数据
      */
     public <D, A> List<D> attachList(List<D> list, List<A> fromList, List<String> fieldNames) {
         return attachList(null, list, fromList, fieldNames, null, null);
     }
 
     /**
-     * 有map无keys有clazzD
+     * 有map无fieldNames有clazzD
      */
     public <D, A> List<D> attachList(Class<D> clazzD, List<D> list, List<A> fromList, Map<String, String> correspondingFieldsMap) {
         return attachList(clazzD, list, fromList, null, correspondingFieldsMap, null);
     }
 
     /**
-     * 有map无keys有clazzD带exceptKeySet
+     * 有map无fieldNames有clazzD带exceptKeySet
      */
     public <D, A> List<D> attachList(Class<D> clazzD, List<D> list, List<A> fromList, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
         return attachList(clazzD, list, fromList, null, correspondingFieldsMap, exceptFieldsSet);
     }
 
     /**
-     * 有map有keys无clazzD
+     * 有map有fieldNames无clazzD
      */
     public <D, A> List<D> attachList(List<D> list, List<A> fromList, List<String> fieldNames, Map<String, String> correspondingFieldsMap) {
         return attachList(null, list, fromList, fieldNames, correspondingFieldsMap, null);
@@ -285,13 +282,13 @@ public class DataPorter {
      * 将A类型的集合fromList中的部分数据(通过fieldNames和keyMap指定)添加进入D类型的集合list中
      * 注：   0，D，A都应符合标准的bean规范（无视serialVersionUID）
      * 1，clazzD、list、fieldNames 至少应该有一个是有数据(非空)的，否则调用本方法无意义
-     * 这里的数据依据，keys的优先级最高，其次为clazzD，再次为list中的元素；
+     * 这里的数据依据，fieldNames的优先级最高，其次为clazzD，再次为list中的元素；
      *
-     * @param clazzD                 加这个参数的目的是如若list无值，那么我将无法获取它，而我又存在需要通过它获取到keys的状况
+     * @param clazzD                 加这个参数的目的是如若list无值，那么我将无法获取它，而我又存在需要通过它获取到fieldNames的状况
      * @param list                   指代我们要合成的数据集
      * @param fromList               现有的数据集，要将<A>fromList中的数据植入<D>list
-     * @param fieldNames             指定D类中哪些字段参与数据合成
-     * @param correspondingFieldsMap <k,v> 用于处理两个类因字段名不同导致的尴尬 k:应当为keys中存在的属于D的字段名，v：应当为A中存在的字段名
+     * @param fieldNames             指定D类中哪些字段参与数据合成（为null默认D字段名list,size为0默认A字段名list）
+     * @param correspondingFieldsMap <k,v> 用于处理两个类因字段名不同导致的尴尬 k:应当为fieldNames中存在的属于D的字段名，v：应当为A中存在的字段名
      * @param <D>                    要合成的数据类型
      * @param <A>                    现提供数据的集合元素的数据类型
      * @return 处理后的D类型数据集合
@@ -299,21 +296,17 @@ public class DataPorter {
     public <D, A> List<D> attachList(Class<D> clazzD, List<D> list, List<A> fromList, List<String> fieldNames, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
         if (fromList == null || fromList.size() <= 0) return list;
 
-        //1,如果未提供keys则默认使用D类所有字段名
-        if (fieldNames == null || fieldNames.size() == 0) {
-            Field[] dFields;
+        //1,如果未提供fieldNames则默认使用D类所有字段名
+        if(fieldNames == null){
             if (clazzD == null) {
-                //keys没有，classD有咩有，list也没点东西，玩毛...
+                //fieldNames没有，classD有咩有，list也没点东西，玩毛...
                 if (list == null || list.size() <= 0) return list;
-                //list中有数据，则通过list中的一条数据来获取D类字段集
-                dFields = list.get(0).getClass().getDeclaredFields();
-            } else {
-                dFields = clazzD.getDeclaredFields();
+                fieldNames = extractFieldNames(list.get(0).getClass());
+            }else {
+                fieldNames = extractFieldNames(clazzD);
             }
-            fieldNames = new ArrayList();
-            for (Field field : dFields) {
-                fieldNames.add(field.getName());
-            }
+        }else if(fieldNames.size() == 0){
+            fieldNames = extractFieldNames(fromList.get(0).getClass());
         }
 
         if (list == null) list = new ArrayList();
@@ -406,6 +399,21 @@ public class DataPorter {
     protected void dealWithErrorFieldsSet(Set<String> errorFieldsSet) {
         //LOGGER.info("1000 === 创建PropertyDescriptor失败 === errorFieldsSet:{}", errorFieldsSet);
         System.out.println("=== errorFieldsSet === " + transferToString(errorFieldsSet));
+    }
+
+    /**
+     * 提取一个类的字段名列表
+     * @param clazz
+     * @return
+     */
+    public List<String> extractFieldNames(Class<?> clazz){
+        Field[] fields = clazz.getDeclaredFields();
+        List<String> fieldNames = new ArrayList<String>();
+        if(fields.length > 0)
+            for (Field field : fields) {
+                fieldNames.add(field.getName());
+            }
+        return fieldNames;
     }
 
     /**
