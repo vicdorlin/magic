@@ -3,7 +3,7 @@ package org.vic.test;
 
 import org.vic.test.domain.Dog;
 import org.vic.test.domain.Doggy;
-import org.vic.test.domain.Snoopy;
+import org.vic.test.domain.Wang;
 import org.vic.warrior.DataPorter;
 
 import java.util.*;
@@ -19,16 +19,18 @@ public class TestReflectSet {
         DataPorter porter = DataPorter.getPorter();
 
         List<Doggy> doggies = Doggy.generateDoggies(10);
-        List<Snoopy> snoopies = Snoopy.generateDoggies(5);
+//        List<Snoopy> snoopies = Snoopy.generateDoggies(5);
+        List<Wang> wangs = Wang.getWangs(6);
 //        System.out.println("=== doggies === " + doggies);
 //        System.out.println("=== snoopies === " + snoopies);
         List<Dog> dogs = new ArrayList<Dog>();
-        Map<String,String> snoopyMap = new HashMap<String, String>();
-        snoopyMap.put("name","snoopyName");
+//        Map<String,String> snoopyMap = new HashMap<String, String>();
+//        snoopyMap.put("name","snoopyName");
         Set<String> eraseFieldsSet = new HashSet<String>();
         eraseFieldsSet.add("cool");
         dogs = porter.attachList(Dog.class,dogs,doggies,eraseFieldsSet);
-        dogs = porter.attachList(Dog.class,dogs,snoopies,snoopyMap);
+//        dogs = porter.attachList(Dog.class,dogs,snoopies,snoopyMap);
+        dogs = porter.attachList(Dog.class,dogs,wangs);
         System.out.println("=== dogs.size() === " + dogs.size());
 
         //抹掉所有的cool
