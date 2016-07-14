@@ -417,40 +417,6 @@ public class DataPorter {
     }
 
     /**
-     * transfer o to a date object
-     *
-     * @param o the object to transfer
-     */
-    public <O> Date transferToDate(O o) {
-        if (o == null) return null;
-        if (o instanceof Date) return (Date) o;
-
-        if (o instanceof String) {
-            DateFormatEnum[] dateFormatEna = DateFormatEnum.values();
-            for (DateFormatEnum dateFormatEnum : dateFormatEna) {
-                Date date = transferStringToDate((String) o, dateFormatEnum.getValue());
-                if (date != null) return date;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * transfer text to date by specify date format
-     *
-     * @param text   the text to transfer, not null
-     * @param format
-     * @return
-     */
-    public Date transferStringToDate(String text, String format) {
-        try {
-            return new SimpleDateFormat(format).parse(text);
-        } catch (ParseException e) {
-            return null;
-        }
-    }
-
-    /**
      * 将符合bean规范的对象按<字段名,属性值>转为Map
      *
      * @throws IntrospectionException
@@ -496,6 +462,40 @@ public class DataPorter {
             map.put(fieldName, transferToString(o));
         }
         return map;
+    }
+
+    /**
+     * transfer o to a date object
+     *
+     * @param o the object to transfer
+     */
+    private <O> Date transferToDate(O o) {
+        if (o == null) return null;
+        if (o instanceof Date) return (Date) o;
+
+        if (o instanceof String) {
+            DateFormatEnum[] dateFormatEna = DateFormatEnum.values();
+            for (DateFormatEnum dateFormatEnum : dateFormatEna) {
+                Date date = transferStringToDate((String) o, dateFormatEnum.getValue());
+                if (date != null) return date;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * transfer text to date by specify date format
+     *
+     * @param text   the text to transfer, not null
+     * @param format
+     * @return
+     */
+    private Date transferStringToDate(String text, String format) {
+        try {
+            return new SimpleDateFormat(format).parse(text);
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
 }
