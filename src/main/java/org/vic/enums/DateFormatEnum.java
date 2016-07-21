@@ -18,7 +18,6 @@ public enum DateFormatEnum {
     M_D("M-d"),
     M$D("M/d"),
     TIME_SEQUENCE("yyyyMMddHHmmss");
-    ;
     private String value;
 
     private DateFormatEnum(String value) {
