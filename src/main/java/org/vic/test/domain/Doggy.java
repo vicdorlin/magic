@@ -36,16 +36,16 @@ public class Doggy {
         List<Doggy> doggies = new ArrayList<Doggy>();
         for (int i = 0; i < num; i++) {
             String name = "doggy" + i + "号";
-            int age = (int) (Math.random() * 10);
+            int age = (int) (Math.random() * 10) + 1;
             String color = getColorNum() + "";
-            doggies.add(new Doggy(name, age, color, false));
+            doggies.add(new Doggy(name, age, color, false, new Date(),"2016-07-08 12:12:18"));
         }
         return doggies;
     }
 
-    public int tryReturnSix(int num){
-        if(num == 1) return 6;
-        if(num == 2) return 66;
+    public int tryReturnSix(int num) {
+        if (num == 1) return 6;
+        if (num == 2) return 66;
         return 666;
     }
 
