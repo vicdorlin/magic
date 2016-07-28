@@ -107,16 +107,13 @@ public class DataPorter {
 
         if (fieldNames == null) {               //1,如果未提供fieldNames则默认使用D类所有字段名
             fieldNames = extractFieldNames(clazzD);
-        }else if(fieldNames.size() == 0){       //2,如果提供内容为空的fieldNames,则默认使用A类型所有字段名
+        } else if (fieldNames.isEmpty()) {       //2,如果提供内容为空的fieldNames,则默认使用A类型所有字段名
             fieldNames = extractFieldNames(fromData.getClass());
         }
 
-        //用于存储收集的问题key
-        Set<String> errorFieldsSet = new HashSet();
         Class clazzA = fromData.getClass();
 
-        if (errorFieldsSet.size() > 0) dealWithErrorFieldsSet(errorFieldsSet);
-        return (D) compose(fromData, clazzD, clazzA, fieldNames, correspondingFieldsMap, exceptFieldsSet, errorFieldsSet);
+        return (D) compose(fromData, clazzD, clazzA, fieldNames, correspondingFieldsMap, exceptFieldsSet);
     }
 
     /*===copyList意味着生成=======【list数据操作】======attachList意味着附加，即不断往传入的list中添加数据===*/
@@ -238,13 +235,13 @@ public class DataPorter {
     }
 
     /**
-     * 擦除list中所有元素中指定的几个字段
+     * 擦除list中所有元素中指定的几个字段数据
      *
      * @param dList          操作集合
      * @param eraseFieldsSet 要擦除后期数据的字段
      */
     public <D> List<D> eraseList(List<D> dList, Set<String> eraseFieldsSet) {
-        if (dList == null || dList.size() <= 0 || eraseFieldsSet == null || eraseFieldsSet.size() <= 0) return dList;
+        if (dList == null || dList.isEmpty() || eraseFieldsSet == null || eraseFieldsSet.isEmpty()) return dList;
         return (List<D>) attachList(dList.get(0).getClass(), null, dList, null, null, eraseFieldsSet);
     }
 
@@ -294,81 +291,75 @@ public class DataPorter {
      * @return 处理后的D类型数据集合
      */
     public <D, A> List<D> attachList(Class<D> clazzD, List<D> list, List<A> fromList, List<String> fieldNames, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
-        if (fromList == null || fromList.size() <= 0) return list;
+        if (fromList == null || fromList.isEmpty()) return list;
 
         //1,如果未提供fieldNames则默认使用D类所有字段名
-        if(fieldNames == null){
+        if (fieldNames == null) {
             if (clazzD == null) {
                 //fieldNames没有，classD有咩有，list也没点东西，玩毛...
-                if (list == null || list.size() <= 0) return list;
+                if (list == null || list.isEmpty()) return list;
                 fieldNames = extractFieldNames(list.get(0).getClass());
-            }else {
+            } else {
                 fieldNames = extractFieldNames(clazzD);
             }
-        }else if(fieldNames.size() == 0){
+        } else if (fieldNames.isEmpty()) {
+            //所提供的fieldNames无数据则使用A类所有字段名
             fieldNames = extractFieldNames(fromList.get(0).getClass());
         }
 
         if (list == null) list = new ArrayList();
 
-        //用于存储收集的问题key
-        Set<String> errorFieldsSet = new HashSet();
         //2,遍历fromList
         for (A a : fromList) {
             Class clazzA = a.getClass();
-            list.add((D) compose(a, clazzD, clazzA, fieldNames, correspondingFieldsMap, exceptFieldsSet, errorFieldsSet));
-        }
-        if (errorFieldsSet.size() > 0) {
-            //获取当前执行的方法名字
-            //String methodName = new Throwable().getStackTrace()[0].getMethodName();
-            dealWithErrorFieldsSet(errorFieldsSet);
+            list.add((D) compose(a, clazzD, clazzA, fieldNames, correspondingFieldsMap, exceptFieldsSet));
         }
         return list;
     }
 
-    private <D, A> D compose(A a, Class<D> clazzD, Class<A> clazzA, List<String> fieldNames, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet, Set<String> errorFieldsSet) {
-        D d = null;
+    /**
+     * 将A类对象a中由fieldNames指定的数据，但是不包括exceptFieldsSet（默认serialVersionUID）中包含的字段，
+     * 按照correspondingFieldsMap中配置的对应关系（默认同名对应），拷贝或生成类型D的一个实例
+     */
+    private <D, A> D compose(A a, Class<D> clazzD, Class<A> clazzA, List<String> fieldNames, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
+        D d;
         try {
             d = clazzD.newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+        if (exceptFieldsSet == null) {
+            exceptFieldsSet = new HashSet<String>();
+        }
+        exceptFieldsSet.add("serialVersionUID");
         for (String fieldName : fieldNames) {
-            if ("serialVersionUID".equals(fieldName) || (exceptFieldsSet != null && exceptFieldsSet.contains(fieldName)))
-                continue;
+            if (exceptFieldsSet.contains(fieldName)) continue;
 
-            //默认取相同名称的字段
-            String fieldNameOfA = fieldName;
-            if (correspondingFieldsMap != null && correspondingFieldsMap.size() > 0) {
-                Set<String> keySet = correspondingFieldsMap.keySet();
-                if (keySet.contains(fieldName)) {
-                    fieldNameOfA = correspondingFieldsMap.get(fieldName);
-                }
+            //参数对象相对于fieldName的字段名
+            String fieldNameOfA;
+            //由字段对应Map决定
+            if (correspondingFieldsMap != null && correspondingFieldsMap.keySet().contains(fieldName)) {
+                fieldNameOfA = correspondingFieldsMap.get(fieldName);
+            } else {
+                //默认取相同名称的字段
+                fieldNameOfA = fieldName;
             }
 
             try {
                 transferFieldValue(d, clazzD, a, clazzA, fieldName, fieldNameOfA);
             } catch (IntrospectionException e) {
-                /*创建PropertyDescriptor失败，指定字段名（fieldName）不存在于相应类中
+                /*创建PropertyDescriptor失败，指定字段名（fieldName）不存在于参数类中
                 或无其对应getters(boolean字段可以为is开头) or setters*/
-                if (!errorFieldsSet.contains(fieldName)) {
-                    errorFieldsSet.add(fieldName);
-                }
                 continue;
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                /*方法访问异常*/
-                e.printStackTrace();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
         return d;
     }
 
     /**
-     * fieldValueA类型可能与D中相应字段不匹配
+     * @Coverable fieldValueA类型可能与D中相应字段不匹配
      * 需要在子类中重写本方法，根据key值区别处理
      * 默认可以转为String或Date
      */
@@ -393,23 +384,15 @@ public class DataPorter {
     }
 
     /**
-     * cover it in the subclasses to deal with errorFieldsSet
-     * which may always for show error fields on server logs
-     */
-    protected void dealWithErrorFieldsSet(Set<String> errorFieldsSet) {
-        //LOGGER.info("1000 === 创建PropertyDescriptor失败 === errorFieldsSet:{}", errorFieldsSet);
-        System.out.println("=== errorFieldsSet === " + transferToString(errorFieldsSet));
-    }
-
-    /**
-     * 提取一个类的字段名列表
+     * 提取一个类的字段名List
+     *
      * @param clazz
      * @return
      */
-    public List<String> extractFieldNames(Class<?> clazz){
+    public List<String> extractFieldNames(Class<?> clazz) {
         Field[] fields = clazz.getDeclaredFields();
         List<String> fieldNames = new ArrayList<String>();
-        if(fields.length > 0)
+        if (fields.length > 0)
             for (Field field : fields) {
                 fieldNames.add(field.getName());
             }
@@ -430,7 +413,7 @@ public class DataPorter {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             String fieldName = field.getName();
-            if ("serialVersionUID".equals(fieldName)) continue;
+            if (fieldName.startsWith("serialVersionUID")) continue;
             PropertyDescriptor descriptor = new PropertyDescriptor(fieldName, clazz);
             Method getter = descriptor.getReadMethod();
             Object o = getter.invoke(b);
@@ -454,7 +437,7 @@ public class DataPorter {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             String fieldName = field.getName();
-            if ("serialVersionUID".equals(fieldName)) continue;
+            if (fieldName.startsWith("serialVersionUID")) continue;
             PropertyDescriptor descriptor = new PropertyDescriptor(fieldName, clazz);
             Method getter = descriptor.getReadMethod();
             Object o = getter.invoke(b);
