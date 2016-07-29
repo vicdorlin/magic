@@ -7,6 +7,7 @@ import org.vic.enums.DateFormatEnum;
 import java.util.Date;
 
 /**
+ * 对DateTime的简单封装
  * Created by Vicdor on 2016-05-07-0007.
  */
 public class DateUtils {
