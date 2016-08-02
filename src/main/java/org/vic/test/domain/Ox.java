@@ -2,21 +2,12 @@ package org.vic.test.domain;
 
 /**
  * @author vicdor
- * @create 2016-08-02 20:07
+ * @create 2016-08-02 21:15
  */
-public class Cat {
+public class Ox {
     private String name;
     private Integer age;
-    private Sheep baby;
-    private String other;
-
-    public String getOther() {
-        return other;
-    }
-
-    public void setOther(String other) {
-        this.other = other;
-    }
+    private Sheep2 baby;
 
     public String getName() {
         return name;
@@ -34,11 +25,11 @@ public class Cat {
         this.age = age;
     }
 
-    public Sheep getBaby() {
+    public Sheep2 getBaby() {
         return baby;
     }
 
-    public void setBaby(Sheep baby) {
+    public void setBaby(Sheep2 baby) {
         this.baby = baby;
     }
 }

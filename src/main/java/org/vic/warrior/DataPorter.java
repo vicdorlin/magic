@@ -24,10 +24,7 @@ import static org.vic.util.CommonUtils.transferToString;
  */
 public class DataPorter {
 
-    private DataPorter() {
-    }
-
-    protected DataPorter(boolean forExtends) {
+    protected DataPorter() {
     }
 
     private static class PorterHolder {
@@ -452,7 +449,7 @@ public class DataPorter {
      *
      * @param o the object to transfer
      */
-    private <O> Date transferToDate(O o) {
+    protected <O> Date transferToDate(O o) {
         if (o == null) return null;
         if (o instanceof Date) return (Date) o;
 
@@ -473,7 +470,7 @@ public class DataPorter {
      * @param format
      * @return
      */
-    private Date transferStringToDate(String text, String format) {
+    protected Date transferStringToDate(String text, String format) {
         try {
             return new SimpleDateFormat(format).parse(text);
         } catch (ParseException e) {
