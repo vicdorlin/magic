@@ -356,17 +356,24 @@ public class DataPorter {
     }
 
     /**
-     * @Coverable fieldValueA类型可能与D中相应字段不匹配
-     * 需要在子类中重写本方法，根据key值区别处理
-     * 默认可以转为String或Date
+     * 传输指定字段的数据
      */
-    protected <D, A> void transferFieldValue(D d, Class<D> clazzD, A a, Class<A> clazzA, String fieldName, String fieldNameOfA) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
+    private <D, A> void transferFieldValue(D d, Class<D> clazzD, A a, Class<A> clazzA, String fieldName, String fieldNameOfA) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
         PropertyDescriptor pdA = new PropertyDescriptor(fieldNameOfA, clazzA);
         Method aGetter = pdA.getReadMethod();
         Object fieldValueA = aGetter.invoke(a);
 
         PropertyDescriptor pdD = new PropertyDescriptor(fieldName, clazzD);
         Method dSetter = pdD.getWriteMethod();
+        copyValue(d, fieldValueA, dSetter, fieldName);
+    }
+
+    /**
+     * @Coverable fieldValueA类型可能与D中相应字段不匹配
+     * 需要在子类中重写本方法，根据key值区别处理
+     * 默认可以转为String或Date
+     */
+    protected <D> void copyValue(D d, Object fieldValueA, Method dSetter, String fieldName) throws IllegalAccessException, InvocationTargetException {
         try {
             dSetter.invoke(d, fieldValueA);
         } catch (IllegalArgumentException e) {
