@@ -321,53 +321,41 @@ public class DataPorter {
      * 按照correspondingFieldsMap中配置的对应关系（默认同名对应），拷贝或生成类型D的一个实例
      */
     private <D, A> D compose(A a, Class<D> clazzD, Class<A> clazzA, List<String> fieldNames, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
-        D d;
         try {
-            d = clazzD.newInstance();
+            D d = clazzD.newInstance();
+            if (exceptFieldsSet == null) {
+                exceptFieldsSet = new HashSet<String>();
+            }
+            exceptFieldsSet.add("serialVersionUID");
+            for (String fieldName : fieldNames) {
+                if (exceptFieldsSet.contains(fieldName)) continue;
+                //参数对象相对于fieldName的字段名
+                String fieldNameOfA;
+                //由字段对应Map决定
+                if (correspondingFieldsMap != null && correspondingFieldsMap.keySet().contains(fieldName)) {
+                    fieldNameOfA = correspondingFieldsMap.get(fieldName);
+                } else {
+                    //默认取相同名称的字段
+                    fieldNameOfA = fieldName;
+                }
+                try {
+                    PropertyDescriptor pdA = new PropertyDescriptor(fieldNameOfA, clazzA);
+                    Method aGetter = pdA.getReadMethod();
+                    Object fieldValueA = aGetter.invoke(a);
+
+                    PropertyDescriptor pdD = new PropertyDescriptor(fieldName, clazzD);
+                    Method dSetter = pdD.getWriteMethod();
+                    copyValue(d, fieldValueA, dSetter, fieldName);
+                } catch (IntrospectionException e) {
+                /*创建PropertyDescriptor失败，指定字段名（fieldName）不存在于参数类中
+                或无其对应getters(boolean字段可以为is开头) or setters*/
+                    continue;
+                }
+            }
+            return d;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        if (exceptFieldsSet == null) {
-            exceptFieldsSet = new HashSet<String>();
-        }
-        exceptFieldsSet.add("serialVersionUID");
-        for (String fieldName : fieldNames) {
-            if (exceptFieldsSet.contains(fieldName)) continue;
-
-            //参数对象相对于fieldName的字段名
-            String fieldNameOfA;
-            //由字段对应Map决定
-            if (correspondingFieldsMap != null && correspondingFieldsMap.keySet().contains(fieldName)) {
-                fieldNameOfA = correspondingFieldsMap.get(fieldName);
-            } else {
-                //默认取相同名称的字段
-                fieldNameOfA = fieldName;
-            }
-
-            try {
-                transferFieldValue(d, clazzD, a, clazzA, fieldName, fieldNameOfA);
-            } catch (IntrospectionException e) {
-                /*创建PropertyDescriptor失败，指定字段名（fieldName）不存在于参数类中
-                或无其对应getters(boolean字段可以为is开头) or setters*/
-                continue;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return d;
-    }
-
-    /**
-     * 传输指定字段的数据
-     */
-    private <D, A> void transferFieldValue(D d, Class<D> clazzD, A a, Class<A> clazzA, String fieldName, String fieldNameOfA) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
-        PropertyDescriptor pdA = new PropertyDescriptor(fieldNameOfA, clazzA);
-        Method aGetter = pdA.getReadMethod();
-        Object fieldValueA = aGetter.invoke(a);
-
-        PropertyDescriptor pdD = new PropertyDescriptor(fieldName, clazzD);
-        Method dSetter = pdD.getWriteMethod();
-        copyValue(d, fieldValueA, dSetter, fieldName);
     }
 
     /**
