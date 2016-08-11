@@ -15,9 +15,11 @@ import static org.vic.util.CommonUtils.transferToString;
 
 /**
  * 数据搬运工
- * 0,To transfer message to another type
- * 1,To copy data from one object to another object which holds different type
- * 2,To copy list form one list to another list which holds different type of elements
+ * Data Carrier
+ *
+ * 0,Transfer data to another type
+ * 1,Copy data from one object to another
+ * 2,Copy list form one list to another
  *
  * @author vicdor
  * @create 2016-07-11 01:42
