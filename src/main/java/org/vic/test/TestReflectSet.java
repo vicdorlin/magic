@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class TestReflectSet {
     public static void main(String[] args) throws Exception {
-        DataPorter porter = DataPorter.getPorter();
+        DataPorter porter = DataPorter.newPorter();
 
         List<Doggy> doggies = Doggy.generateDoggies(10);
 //        List<Snoopy> snoopies = Snoopy.generateDoggies(5);

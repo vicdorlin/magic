@@ -17,7 +17,7 @@ public class MyCopyToTest {
     public static void main(String[] args) throws ParseException {
         List<Doggy> doggies = Doggy.generateDoggies(1000);
         Doggy d = doggies.get(0);
-        DataPorter porter = DataPorter.getPorter();
+        DataPorter porter = DataPorter.newPorter();
 
         long startTime = System.nanoTime();
         List<Dog> dogs = porter.copyList(Dog.class, doggies);

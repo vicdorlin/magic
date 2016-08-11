@@ -31,7 +31,7 @@ public class DataPorter {
         private static final DataPorter PORTER = new DataPorter();
     }
 
-    public static DataPorter getPorter() {
+    public static DataPorter newPorter() {
         return PorterHolder.PORTER;
     }
 
