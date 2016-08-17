@@ -14,18 +14,19 @@ import java.util.Map;
 public class CommonUtils {
     /**
      * 判断对象是否不为空
+     *
      * @param o
      * @return
      */
-    public static boolean exist(Object o){
-        if(o == null) return false;
-        if(o instanceof String){
+    public static boolean exist(Object o) {
+        if (o == null) return false;
+        if (o instanceof String) {
             return ((String) o).trim().length() > 0;
         }
-        if(o instanceof Collection){
+        if (o instanceof Collection) {
             return ((Collection) o).size() > 0;
         }
-        if(o instanceof Map){
+        if (o instanceof Map) {
             return ((Map) o).size() > 0;
         }
         return true;
@@ -33,49 +34,43 @@ public class CommonUtils {
 
     /**
      * 判断对象是否为空
+     *
      * @param o
      * @return
      */
-    public static boolean notExist(Object o){
-        if(o == null) return true;
-        if(o instanceof String){
-            return ((String) o).trim().length() == 0;
-        }
-        if(o instanceof Collection){
-            return ((Collection) o).size() == 0;
-        }
-        if(o instanceof Map){
-            return ((Map) o).size() == 0;
-        }
-        return false;
+    public static boolean notExist(Object o) {
+        return !exist(o);
     }
 
     /**
      * 判断字符串是否是纯数字
+     *
      * @param str
      * @return
      */
-    public static boolean isStringNumber(String str){
-        if(notExist(str)) return false;
+    public static boolean isStringNumber(String str) {
+        if (notExist(str)) return false;
         return str.matches("^[0-9]*$");
     }
 
     /**
      * 判断一个集合是否不存在非空子集
+     *
      * @param collection
      * @return
      */
-    public static boolean isSetEmpty(Collection collection){
+    public static boolean isSetEmpty(Collection collection) {
         return collection == null || collection.size() == 0;
     }
 
     /**
      * 判断一个集合是否存在非空子集
+     *
      * @param collection
      * @return
      */
-    public static boolean isSetNotEmpty(Collection collection){
-        return collection != null && collection.size() > 0;
+    public static boolean isSetNotEmpty(Collection collection) {
+        return !isSetEmpty(collection);
     }
 
     /**
