@@ -110,9 +110,7 @@ public class DataPorter {
             fieldNames = extractFieldNames(fromData.getClass());
         }
 
-        Class clazzA = fromData.getClass();
-
-        return (D) compose(fromData, clazzD, clazzA, fieldNames, correspondingFieldsMap, exceptFieldsSet);
+        return compose(fromData, clazzD, fieldNames, correspondingFieldsMap, exceptFieldsSet);
     }
 
     /*===copyList意味着生成=======【list数据操作】======attachList意味着附加，即不断往传入的list中添加数据===*/
@@ -310,8 +308,7 @@ public class DataPorter {
 
         //2,遍历fromList
         for (A a : fromList) {
-            Class clazzA = a.getClass();
-            list.add((D) compose(a, clazzD, clazzA, fieldNames, correspondingFieldsMap, exceptFieldsSet));
+            list.add(compose(a, clazzD, fieldNames, correspondingFieldsMap, exceptFieldsSet));
         }
         return list;
     }
@@ -320,7 +317,7 @@ public class DataPorter {
      * 将A类对象a中由fieldNames指定的数据，但是不包括exceptFieldsSet（默认serialVersionUID）中包含的字段，
      * 按照correspondingFieldsMap中配置的对应关系（默认同名对应），拷贝或生成类型D的一个实例
      */
-    private <D, A> D compose(A a, Class<D> clazzD, Class<A> clazzA, List<String> fieldNames, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
+    private <D, A> D compose(A a, Class<D> clazzD, List<String> fieldNames, Map<String, String> correspondingFieldsMap, Set<String> exceptFieldsSet) {
         try {
             D d = clazzD.newInstance();
             if (exceptFieldsSet == null) {
@@ -339,7 +336,7 @@ public class DataPorter {
                     fieldNameOfA = fieldName;
                 }
                 try {
-                    PropertyDescriptor pdA = new PropertyDescriptor(fieldNameOfA, clazzA);
+                    PropertyDescriptor pdA = new PropertyDescriptor(fieldNameOfA, a.getClass());
                     Method aGetter = pdA.getReadMethod();
                     Object fieldValueA = aGetter.invoke(a);
 
