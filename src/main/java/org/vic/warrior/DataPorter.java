@@ -304,7 +304,7 @@ public class DataPorter {
             fieldNames = extractFieldNames(fromList.get(0).getClass());
         }
 
-        if (list == null) list = new ArrayList();
+        if (list == null) list = new ArrayList<D>();
 
         //2,遍历fromList
         for (A a : fromList) {
@@ -443,7 +443,7 @@ public class DataPorter {
      *
      * @param o the object to transfer
      */
-    protected <O> Date transferToDate(O o) {
+    protected Date transferToDate(Object o) {
         if (o == null) return null;
         if (o instanceof Date) return (Date) o;
 
