@@ -26,15 +26,20 @@ import static org.vic.util.CommonUtils.transferToString;
  */
 public class DataPorter {
 
-    protected DataPorter() {
-    }
-
-    private static class PorterHolder {
-        private static final DataPorter PORTER = new DataPorter();
-    }
-
+    /**
+     * 返回一个porter
+     * @return
+     */
     public static DataPorter newPorter() {
-        return PorterHolder.PORTER;
+        return new DataPorter();
+    }
+
+    /**
+     * 返回一个对象的class类型，并强转为D的class
+     */
+    @SuppressWarnings(value = "unchecked")
+    public <D> Class<D> classCast(D d) {
+        return (Class<D>) d.getClass();
     }
 
     /**
@@ -44,7 +49,7 @@ public class DataPorter {
      */
     public <D> D eraseData(D d, Set<String> eraseFieldsSet) {
         if (d == null || eraseFieldsSet == null || eraseFieldsSet.size() <= 0) return d;
-        return (D) copyData(d.getClass(), d, eraseFieldsSet);
+        return copyData(classCast(d), d, eraseFieldsSet);
     }
 
     /**
@@ -113,7 +118,7 @@ public class DataPorter {
         return compose(fromData, clazzD, fieldNames, correspondingFieldsMap, exceptFieldsSet);
     }
 
-    /*===copyList意味着生成=======【list数据操作】======attachList意味着附加，即不断往传入的list中添加数据===*/
+    /*===copyList意味着生成=======【list数据操作】======attachList意味着附加，即不断往传入的list中添加数据===*//*
 
     /**
      * (若符合默认规则推荐使用)
@@ -239,7 +244,7 @@ public class DataPorter {
      */
     public <D> List<D> eraseList(List<D> dList, Set<String> eraseFieldsSet) {
         if (dList == null || dList.isEmpty() || eraseFieldsSet == null || eraseFieldsSet.isEmpty()) return dList;
-        return (List<D>) attachList(dList.get(0).getClass(), null, dList, null, null, eraseFieldsSet);
+        return attachList(classCast(dList.get(0)), null, dList, null, null, eraseFieldsSet);
     }
 
     /**
@@ -398,7 +403,7 @@ public class DataPorter {
      * @throws IllegalAccessException
      */
     public <B> Map<String, Object> transferBeanToMap(B b) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
-        Map<String, Object> map = new HashMap();
+        Map<String, Object> map = new HashMap<String, Object>();
         if (b == null) return map;
         Class clazz = b.getClass();
         Field[] fields = clazz.getDeclaredFields();
@@ -422,7 +427,7 @@ public class DataPorter {
      * @throws IllegalAccessException
      */
     public <B> Map<String, String> transferBeanToStringMap(B b) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
-        HashMap<String, String> map = new HashMap();
+        HashMap<String, String> map = new HashMap<String, String>();
         if (b == null) return map;
         Class clazz = b.getClass();
         Field[] fields = clazz.getDeclaredFields();
