@@ -6,7 +6,11 @@
 
     <groupId>org.vic</groupId>
     <artifactId>magic</artifactId>
+    <packaging>pom</packaging>
     <version>1.0.0</version>
+    <modules>
+        <module>amazing</module>
+    </modules>
 
     <dependencies>
         <dependency>

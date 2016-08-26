@@ -3,10 +3,9 @@ package org.vic.util;
 import com.alibaba.fastjson.JSON;
 import org.vic.enums.DateFormatEnum;
 
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Vicdor on 2016-04-30-0030.
@@ -86,5 +85,22 @@ public class CommonUtils {
         if (t instanceof Date) return new SimpleDateFormat(DateFormatEnum.DEFAULT.getValue()).format(t);
         if (t instanceof Number || t instanceof Character || t instanceof Boolean) return String.valueOf(t);
         return JSON.toJSONString(t);
+    }
+
+    /**
+     * 得到一个Bean类型的所有字段名
+     *
+     * @param clazz
+     * @return
+     */
+    public static List<String> extractFieldNames(Class<?> clazz) {
+        Field[] fields = clazz.getDeclaredFields();
+        List<String> fieldNames = new ArrayList<String>();
+        if (fields.length > 0){
+            for (Field field : fields) {
+                fieldNames.add(field.getName());
+            }
+        }
+        return fieldNames;
     }
 }

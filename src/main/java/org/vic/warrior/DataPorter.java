@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static org.vic.util.CommonUtils.extractFieldNames;
 import static org.vic.util.CommonUtils.transferToString;
 
 /**
@@ -377,22 +378,6 @@ public class DataPorter {
                 dSetter.invoke(d, transferToDate(fieldValueA));
             }
         }
-    }
-
-    /**
-     * 提取一个类的字段名List
-     *
-     * @param clazz
-     * @return
-     */
-    public List<String> extractFieldNames(Class<?> clazz) {
-        Field[] fields = clazz.getDeclaredFields();
-        List<String> fieldNames = new ArrayList<String>();
-        if (fields.length > 0)
-            for (Field field : fields) {
-                fieldNames.add(field.getName());
-            }
-        return fieldNames;
     }
 
     /**
