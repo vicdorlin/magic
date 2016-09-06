@@ -96,11 +96,53 @@ public class CommonUtils {
     public static List<String> extractFieldNames(Class<?> clazz) {
         Field[] fields = clazz.getDeclaredFields();
         List<String> fieldNames = new ArrayList<String>();
-        if (fields.length > 0){
+        if (fields.length > 0) {
             for (Field field : fields) {
                 fieldNames.add(field.getName());
             }
         }
         return fieldNames;
+    }
+
+    /**
+     * Mark key msg string.
+     *
+     * @param msg   the msg
+     * @param color the color
+     * @return the string
+     */
+    public static String markKeyMsg(String msg, String color) {
+        return markKeyMsg(msg, color, "元", "免息");
+    }
+
+    /**
+     * Mark key msg string.
+     *
+     * @param msg   the msg
+     * @param color the color
+     * @param marks the marks
+     * @return the string
+     */
+    public static String markKeyMsg(String msg, String color, String... marks) {
+        for (String mark : marks) {
+            if (!msg.contains(mark)) continue;
+            int markIndex = msg.indexOf(mark);
+            int startIndex = markIndex - 1;
+            int endIntex = markIndex + mark.length();
+            for (; startIndex >= 0 && Character.isDigit(msg.charAt(startIndex)); startIndex--) {}
+            if (++startIndex == markIndex) {
+                continue;
+            }
+            String prefixMsg = msg.substring(0, startIndex);
+            String suffixMsg = msg.substring(endIntex);
+            String content = "<font color='" + color + "'>" + msg.substring(startIndex, endIntex) + "</font>";
+
+            msg = prefixMsg + content + suffixMsg;
+        }
+        return msg;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("=== kkk === " + markKeyMsg("2776免息注册爱学贷立享35元红包", "#125353"));
     }
 }
