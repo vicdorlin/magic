@@ -1,11 +1,7 @@
 package org.vic.test;
 
-import org.vic.test.domain.Cat;
-import org.vic.test.domain.Dog;
-import org.vic.test.domain.Ox;
-import org.vic.test.domain.Rabbit;
-import org.vic.util.CommonUtils;
-import org.vic.warrior.porters.CatPorter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author vicdor
@@ -13,7 +9,7 @@ import org.vic.warrior.porters.CatPorter;
  */
 public class CatTestWithRefType {
     public static void main(String[] args) {
-        Rabbit rabbit = new Rabbit();
+        /*Rabbit rabbit = new Rabbit();
         rabbit.setAge(5);
         rabbit.setName("兔子哦");
         rabbit.setBaby(new Dog("babyDog","1"));
@@ -24,6 +20,26 @@ public class CatTestWithRefType {
         Rabbit rabbit1 = catPorter.copyData(Rabbit.class,cat);
         System.out.println("=== rabbit1 === " + CommonUtils.transferToString(rabbit1));
         Ox ox = catPorter.copyData(Ox.class,cat);
-        System.out.println("=== ox === " + CommonUtils.transferToString(ox));
+        System.out.println("=== ox === " + CommonUtils.transferToString(ox));*/
+
+//        String[] userid = "".split(",");
+//        System.out.println("=== toWho === " + userid.length);
+
+        List<String> list = new ArrayList<String>();
+        System.out.println("=== s === " + list.get(0));
+    }
+
+    public static String getToWho(String toWho){
+        if("" != toWho && null != toWho){
+            if(!(",".equals(toWho.substring(0, 1)))){
+                toWho = ","+toWho;
+            }
+            if(!(",".equals(toWho.substring(toWho.length() - 1,toWho.length())))){
+                toWho = toWho+",";
+            }
+        }else{
+            toWho = "";
+        }
+        return toWho;
     }
 }

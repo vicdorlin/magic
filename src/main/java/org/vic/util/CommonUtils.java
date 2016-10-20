@@ -3,7 +3,9 @@ package org.vic.util;
 import com.alibaba.fastjson.JSON;
 import org.vic.enums.DateFormatEnum;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -27,6 +29,9 @@ public class CommonUtils {
         }
         if (o instanceof Map) {
             return ((Map) o).size() > 0;
+        }
+        if (o instanceof CharSequence) {
+            return ((CharSequence) o).length() > 0;
         }
         return true;
     }
@@ -129,7 +134,8 @@ public class CommonUtils {
             int markIndex = msg.indexOf(mark);
             int startIndex = markIndex - 1;
             int endIntex = markIndex + mark.length();
-            for (; startIndex >= 0 && Character.isDigit(msg.charAt(startIndex)); startIndex--) {}
+            for (; startIndex >= 0 && Character.isDigit(msg.charAt(startIndex)); startIndex--) {
+            }
             if (++startIndex == markIndex) {
                 continue;
             }
@@ -142,7 +148,71 @@ public class CommonUtils {
         return msg;
     }
 
+    /**
+     * Build search map by keywords.
+     * 要求参数数量必须为偶数数量
+     * 奇数位字符串为key,偶数位为其前位key对应之value
+     *
+     * @param keywords the keywords
+     * @return the map
+     */
+    public static Map<String, Object> buildSearchMap(String... keywords) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        for (int i = 0; i < keywords.length; i += 2) {
+            map.put(keywords[i], keywords[i + 1]);
+        }
+        return map;
+    }
+
     public static void main(String[] args) {
-        System.out.println("=== kkk === " + markKeyMsg("2776免息注册爱学贷立享35元红包", "#125353"));
+//        System.out.println("=== kkk === " + markKeyMsg("2776免息注册爱学贷立享35元红包", "#125353"));
+//        String tags = "[\"ss\",\"sda\",\"jjj\"]";
+//
+//        List<String> tagList = JSON.parseArray(tags,String.class);
+//        System.out.println("===  === " + tagList.size());
+
+//        List<String> list = Arrays.asList("ss","sda","jjj");
+//        System.out.println("===  === " + JSONArray.toJSONString(list));;
+
+        /*List<Dog> dogs = new ArrayList<Dog>();
+        for (Dog dog : dogs) {
+            System.out.println("===  === " + dog.getName());
+        }*/
+
+//        System.out.println("=== map === " + buildSearchMap());
+//        System.out.println("=== toString === " + transferToString(new Hey()));
+//
+//        System.out.println("=== get === " + getByFieldName(new Hey(), "hello"));
+    }
+
+    public static <T> Object getByFieldName(T t, String fieldName) {
+        try {
+            PropertyDescriptor pd = new PropertyDescriptor(fieldName,t.getClass());
+            Method getter = pd.getReadMethod();
+            return getter.invoke(t);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static class Hey {
+        private String hello = "sa";
+        private boolean bool = true;
+
+        public String getHello() {
+            return hello;
+        }
+
+        public void setHello(String hello) {
+            this.hello = hello;
+        }
+
+        public boolean isBool() {
+            return bool;
+        }
+
+        public void setBool(boolean bool) {
+            this.bool = bool;
+        }
     }
 }
