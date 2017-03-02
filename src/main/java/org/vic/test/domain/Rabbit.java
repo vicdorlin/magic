@@ -11,6 +11,15 @@ public class Rabbit implements Serializable{
     private String name;
     private Integer age;
     private Dog baby;
+    private boolean hello;
+
+    public boolean isHello() {
+        return hello;
+    }
+
+    public void setHello(boolean hello) {
+        this.hello = hello;
+    }
 
     public String getName() {
         return name;

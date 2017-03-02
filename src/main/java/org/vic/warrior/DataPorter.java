@@ -1,23 +1,24 @@
 package org.vic.warrior;
 
 import org.vic.enums.DateFormatEnum;
+import org.vic.test.domain.Dog;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.vic.util.CommonUtils.extractFieldNames;
-import static org.vic.util.CommonUtils.transferToString;
+import static org.vic.util.CommonUtils.*;
 
 /**
  * 数据搬运工
  * Data Carrier
- *
+ * <p>
  * 0,Transfer data to another type
  * 1,Copy data from one object to another
  * 2,Copy list form one list to another
@@ -29,6 +30,7 @@ public class DataPorter {
 
     /**
      * 返回一个porter
+     *
      * @return
      */
     public static DataPorter newPorter() {
@@ -460,6 +462,107 @@ public class DataPorter {
         } catch (ParseException e) {
             return null;
         }
+    }
+
+    public static void main(String[] args) {
+        Dog dog = DataPorter.newPorter().createBean(Dog.class);
+        System.out.println("===  === " + transferToString(dog));
+    }
+
+    /**
+     * 生成虚拟对象，默认支持递归生成
+     * 有内存溢出风险，可在{@link DataPorter#createBean(java.lang.Class, boolean)}中添加前置条件加以限制
+     *
+     * @param clazz
+     * @param <B>
+     * @return
+     */
+    public <B> B createBean(Class<B> clazz) {
+        return createBean(clazz, true);
+    }
+
+    /**
+     * 生成虚拟对象
+     * 使用者请自行判断是否不宜递归
+     *
+     * @param clazz
+     * @param recursionSupport 是否打开递归，如传入true则针对非基本数据类型以及非常用类型字段进行递归虚拟
+     * @param <B>
+     * @return
+     */
+    public <B> B createBean(Class<B> clazz, boolean recursionSupport) {
+        try {
+            B b = clazz.newInstance();
+            List<String> fieldNames = extractFieldNames(clazz);
+            if (isSetEmpty(fieldNames)) return b;
+            for (String fieldName : fieldNames) {
+                PropertyDescriptor pd;
+                try {
+                    pd = new PropertyDescriptor(fieldName, clazz);
+                } catch (IntrospectionException e) {
+                    continue;
+                }
+                Method fieldSetter = pd.getWriteMethod();
+                String type = pd.getPropertyType().getName();
+                Object value;
+                switch (type) {
+                    case "java.lang.String":
+                        value = fieldName + "_" + (int) (Math.random() * 100000);
+                        break;
+                    case "long":
+                    case "java.lang.Long":
+                        value = new Long((long) (Math.random() * Long.MAX_VALUE));
+                        break;
+                    case "int":
+                    case "java.lang.Integer":
+                        value = new Integer((int) (Math.random() * Integer.MAX_VALUE));
+                        break;
+                    case "java.util.Date":
+                        value = new Date();
+                        break;
+                    case "boolean":
+                    case "java.lang.Boolean":
+                        value = new Boolean((int) (Math.random() * 2) < 1);
+                        break;
+                    case "char":
+                    case "java.lang.Character":
+                        char min = Character.MIN_VALUE;
+                        char max = Character.MAX_VALUE;
+                        value = new Character((char) (Math.random() * (max - min) + min));
+                        break;
+                    case "byte":
+                    case "java.lang.Byte":
+                        value = new Byte((byte) (Math.random() * Byte.MAX_VALUE));
+                        break;
+                    case "short":
+                    case "java.lang.Short":
+                        value = new Short((short) (Math.random() * Short.MAX_VALUE));
+                        break;
+                    case "double":
+                    case "java.lang.Double":
+                        value = new Double(Math.random() * Short.MAX_VALUE);
+                        value = Double.valueOf(new DecimalFormat("#.00").format(value));
+                        break;
+                    case "float":
+                    case "java.lang.Float":
+                        value = new Float(Math.random() * Short.MAX_VALUE);
+                        value = Float.valueOf(new DecimalFormat("#.00").format(value));
+                        break;
+                    default:
+                        if (recursionSupport) {
+                            value = createBean(pd.getPropertyType(), recursionSupport);
+                        } else {
+                            value = null;
+                        }
+                        break;
+                }
+                fieldSetter.invoke(b, value);
+            }
+            return b;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

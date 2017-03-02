@@ -1,7 +1,13 @@
 package org.vic.test;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.vic.test.domain.Cat;
+import org.vic.test.domain.Dog;
+import org.vic.test.domain.Rabbit;
+import org.vic.util.CommonUtils;
+import org.vic.warrior.porters.CatPorter;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author vicdor
@@ -9,14 +15,17 @@ import java.util.List;
  */
 public class CatTestWithRefType {
     public static void main(String[] args) {
-        /*Rabbit rabbit = new Rabbit();
+        Rabbit rabbit = new Rabbit();
         rabbit.setAge(5);
         rabbit.setName("兔子哦");
         rabbit.setBaby(new Dog("babyDog","1"));
+        rabbit.setHello(false);
         CatPorter catPorter = new CatPorter();
-        Cat cat = catPorter.copyData(Cat.class,rabbit);
+        Map<String, String> correspondingFieldsMap = new HashMap<>();
+        correspondingFieldsMap.put("hi","hello");
+        Cat cat = catPorter.copyData(Cat.class,rabbit,correspondingFieldsMap);
         System.out.println("=== ca === " + CommonUtils.transferToString(cat));
-        cat.setName("Cat咯");
+        /*cat.setName("Cat咯");
         Rabbit rabbit1 = catPorter.copyData(Rabbit.class,cat);
         System.out.println("=== rabbit1 === " + CommonUtils.transferToString(rabbit1));
         Ox ox = catPorter.copyData(Ox.class,cat);
@@ -24,9 +33,14 @@ public class CatTestWithRefType {
 
 //        String[] userid = "".split(",");
 //        System.out.println("=== toWho === " + userid.length);
-
-        List<String> list = new ArrayList<String>();
-        System.out.println("=== s === " + list.get(0));
+/*
+        StringBuilder sb = new StringBuilder();
+        sb.append(",123");
+        sb.append(",321");
+        sb.append(",haha");
+        sb.deleteCharAt(0);
+        String sbs = sb.toString();
+        System.out.println("===  === " +"---"+sb.length());*/
     }
 
     public static String getToWho(String toWho){

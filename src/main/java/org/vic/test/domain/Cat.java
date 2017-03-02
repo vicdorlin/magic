@@ -9,6 +9,15 @@ public class Cat {
     private Integer age;
     private Sheep baby;
     private String other;
+    private Integer hi;
+
+    public Integer getHi() {
+        return hi;
+    }
+
+    public void setHi(Integer hi) {
+        this.hi = hi;
+    }
 
     public String getOther() {
         return other;

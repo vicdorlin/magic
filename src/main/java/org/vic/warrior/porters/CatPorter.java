@@ -24,6 +24,11 @@ public class CatPorter extends DataPorter {
             }else {
                 dSetter.invoke(d,super.copyData(Sheep.class,fieldValueA));
             }
+        }else if("hi".equals(fieldName)){
+            if(fieldValueA instanceof Boolean){
+                boolean hi = (boolean) fieldValueA;
+                dSetter.invoke(d,hi?1:0);
+            }
         }else {
             super.copyValue(d,fieldValueA,dSetter,fieldName);
         }

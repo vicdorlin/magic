@@ -9,6 +9,23 @@ public class Ox {
     private Integer age;
     private Sheep2 baby;
 
+    public Ox() {
+    }
+
+    public Ox(String name, Integer age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(super.equals(obj)) return true;
+        if(obj instanceof  Ox){
+            return this.name.equals(((Ox) obj).getName());
+        }
+        return false;
+    }
+
     public String getName() {
         return name;
     }
