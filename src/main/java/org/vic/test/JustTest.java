@@ -1,8 +1,7 @@
 package org.vic.test;
 
-import com.alibaba.fastjson.JSON;
-
-import java.util.List;
+import org.vic.test.domain.Dog;
+import org.vic.warrior.DataPorter;
 
 /**
  * @author vicdor
@@ -20,16 +19,21 @@ public class JustTest {
 //        BigDecimal bg = new BigDecimal(123L);
 //        System.out.println("===  === " + String.valueOf(bg.intValue()));
 
-        String list = "[\"123\",\"221\",\"787\"]";
-        List<Long> numbers = JSON.parseArray(list,Long.class);
-        System.out.println("===  === " + numbers.size());
+//        String list = "[\"123\",\"221\",\"787\"]";
+//        List<Long> numbers = JSON.parseArray(list,Long.class);
+//        System.out.println("===  === " + numbers.size());
+
+        DataPorter porter = DataPorter.newPorter();
+        Dog[] dogs = new Dog[]{porter.createBean(Dog.class), porter.createBean(Dog.class), porter.createBean(Dog.class)};
+        Dog[] newDogs = dogs.clone();
+        System.out.println(newDogs.length);
     }
 
     public static String getParamValueFromUrl(String url, String key) {
         key += "=";
         if (url == null || key == null) return null;
         int index = url.indexOf(key);
-        if(index < 1) return null;
+        if (index < 1) return null;
         char beforeIndex = url.charAt(index - 1);
         if ('&' != beforeIndex && '?' != beforeIndex) {
             url = url.substring(index + key.length());
@@ -42,7 +46,7 @@ public class JustTest {
         return url.substring(0, indexOfAndSign);
     }
 
-    public static void testBool(Boolean haha){
+    public static void testBool(Boolean haha) {
         haha = true;
     }
 }

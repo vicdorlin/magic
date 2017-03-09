@@ -1,6 +1,5 @@
 package org.vic.warrior;
 
-import org.vic.enums.DateFormatEnum;
 import org.vic.test.domain.Dog;
 
 import java.beans.IntrospectionException;
@@ -9,8 +8,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.vic.util.CommonUtils.*;
@@ -28,13 +25,44 @@ import static org.vic.util.CommonUtils.*;
  */
 public class DataPorter {
 
+    private static DataPorter porter;
+
+    private IDataPorterCopier dataPorterCopier;
+
+    private DataPorter() {
+    }
+
     /**
      * 返回一个porter
      *
      * @return
      */
     public static DataPorter newPorter() {
-        return new DataPorter();
+        if (porter != null) {
+            return porter;
+        }
+        porter = new DataPorter();
+        porter.dataPorterCopier = new SimpleDataCopier();
+        return porter;
+    }
+
+    /**
+     * 返回一个定制的porter
+     *
+     * @param clazz 传入的IDataPorterCopier具体实例类型
+     * @param <T> IDataPorterCopier接口的具体实现类
+     * @return 返回一个定制的porter
+     */
+    public static <T extends IDataPorterCopier> DataPorter newCustomizePorter(Class<T> clazz) {
+        DataPorter customizePorter = new DataPorter();
+        try {
+            customizePorter.dataPorterCopier = clazz.newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return customizePorter;
     }
 
     /**
@@ -350,7 +378,7 @@ public class DataPorter {
 
                     PropertyDescriptor pdD = new PropertyDescriptor(fieldName, clazzD);
                     Method dSetter = pdD.getWriteMethod();
-                    copyValue(d, fieldValueA, dSetter, fieldName);
+                    dataPorterCopier.copyValue(d, fieldValueA, dSetter, fieldName);
                 } catch (IntrospectionException e) {
                 /*创建PropertyDescriptor失败，指定字段名（fieldName）不存在于参数类中
                 或无其对应getters(boolean字段可以为is开头) or setters*/
@@ -360,25 +388,6 @@ public class DataPorter {
             return d;
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * @Coverable fieldValueA类型可能与D中相应字段不匹配
-     * 需要在子类中重写本方法，根据key值区别处理
-     * 默认可以转为String或Date
-     */
-    protected <D> void copyValue(D d, Object fieldValueA, Method dSetter, String fieldName) throws IllegalAccessException, InvocationTargetException {
-        try {
-            dSetter.invoke(d, fieldValueA);
-        } catch (IllegalArgumentException e) {
-            try {
-                //如果类型不对应,尝试转为String
-                dSetter.invoke(d, transferToString(fieldValueA));
-            } catch (IllegalArgumentException exception) {
-                //如果类型依旧不对，尝试转为Date
-                dSetter.invoke(d, transferToDate(fieldValueA));
-            }
         }
     }
 
@@ -430,39 +439,6 @@ public class DataPorter {
         return map;
     }
 
-    /**
-     * transfer o to a date object
-     *
-     * @param o the object to transfer
-     */
-    protected Date transferToDate(Object o) {
-        if (o == null) return null;
-        if (o instanceof Date) return (Date) o;
-
-        if (o instanceof String) {
-            DateFormatEnum[] dateFormatEna = DateFormatEnum.values();
-            for (DateFormatEnum dateFormatEnum : dateFormatEna) {
-                Date date = transferStringToDate((String) o, dateFormatEnum.getValue());
-                if (date != null) return date;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * transfer text to date by specify date format
-     *
-     * @param text   the text to transfer, not null
-     * @param format
-     * @return
-     */
-    protected Date transferStringToDate(String text, String format) {
-        try {
-            return new SimpleDateFormat(format).parse(text);
-        } catch (ParseException e) {
-            return null;
-        }
-    }
 
     public static void main(String[] args) {
         Dog dog = DataPorter.newPorter().createBean(Dog.class);

@@ -4,7 +4,8 @@ import org.vic.test.domain.Cat;
 import org.vic.test.domain.Dog;
 import org.vic.test.domain.Rabbit;
 import org.vic.util.CommonUtils;
-import org.vic.warrior.porters.CatPorter;
+import org.vic.warrior.CatDataCopier;
+import org.vic.warrior.DataPorter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,10 +21,10 @@ public class CatTestWithRefType {
         rabbit.setName("兔子哦");
         rabbit.setBaby(new Dog("babyDog","1"));
         rabbit.setHello(false);
-        CatPorter catPorter = new CatPorter();
+        DataPorter porter = DataPorter.newCustomizePorter(CatDataCopier.class);
         Map<String, String> correspondingFieldsMap = new HashMap<>();
         correspondingFieldsMap.put("hi","hello");
-        Cat cat = catPorter.copyData(Cat.class,rabbit,correspondingFieldsMap);
+        Cat cat = porter.copyData(Cat.class,rabbit,correspondingFieldsMap);
         System.out.println("=== ca === " + CommonUtils.transferToString(cat));
         /*cat.setName("Cat咯");
         Rabbit rabbit1 = catPorter.copyData(Rabbit.class,cat);

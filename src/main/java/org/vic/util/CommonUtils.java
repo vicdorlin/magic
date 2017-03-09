@@ -6,6 +6,7 @@ import org.vic.enums.DateFormatEnum;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -93,6 +94,40 @@ public class CommonUtils {
     }
 
     /**
+     * transfer o to a date object
+     *
+     * @param o the object to transfer
+     */
+    public static Date transferToDate(Object o) {
+        if (o == null) return null;
+        if (o instanceof Date) return (Date) o;
+
+        if (o instanceof String) {
+            DateFormatEnum[] dateFormatEna = DateFormatEnum.values();
+            for (DateFormatEnum dateFormatEnum : dateFormatEna) {
+                Date date = transferStringToDate((String) o, dateFormatEnum.getValue());
+                if (date != null) return date;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * transfer text to date by specify date format
+     *
+     * @param text   the text to transfer, not null
+     * @param format
+     * @return
+     */
+    public static Date transferStringToDate(String text, String format) {
+        try {
+            return new SimpleDateFormat(format).parse(text);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
+
+    /**
      * 得到一个Bean类型的所有字段名
      *
      * @param clazz
@@ -149,15 +184,27 @@ public class CommonUtils {
     }
 
     /**
-     * Build search map by keywords.
-     * 要求参数数量必须为偶数数量
-     * 奇数位字符串为key,偶数位为其前位key对应之value
+     * Build search map by keywords. 要求参数数量必须为偶数数量 奇数位字符串为key,偶数位为其前位key对应之value
      *
      * @param keywords the keywords
      * @return the map
      */
     public static Map<String, Object> buildSearchMap(String... keywords) {
         Map<String, Object> map = new HashMap<String, Object>();
+        for (int i = 0; i < keywords.length; i += 2) {
+            map.put(keywords[i], keywords[i + 1]);
+        }
+        return map;
+    }
+
+    /**
+     * just like {@link #buildSearchMap}
+     *
+     * @param keywords the keywords
+     * @return the map
+     */
+    public static Map<String, String> buildTestSearchMap(String... keywords) {
+        Map<String, String> map = new HashMap<String, String>();
         for (int i = 0; i < keywords.length; i += 2) {
             map.put(keywords[i], keywords[i + 1]);
         }
