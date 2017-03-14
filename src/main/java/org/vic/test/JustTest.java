@@ -3,12 +3,15 @@ package org.vic.test;
 import org.vic.test.domain.Dog;
 import org.vic.warrior.DataPorter;
 
+import java.beans.IntrospectionException;
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * @author vicdor
  * @create 2016-12-01 15:18
  */
 public class JustTest {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
         /*List<Dog> dogs = Arrays.asList(new Dog("1","1"),new Dog("2","2"));
         dogs.get(0).setAge("21");
         dogs.get(dogs.size()-1).setAge("33");
@@ -23,10 +26,30 @@ public class JustTest {
 //        List<Long> numbers = JSON.parseArray(list,Long.class);
 //        System.out.println("===  === " + numbers.size());
 
+//        DataPorter porter = DataPorter.newPorter();
+//        Dog dog = new Dog("旺财","12");
+//        dog = porter.fillInBean(dog);
+//        System.out.println("=== dog === " + dog);
+
         DataPorter porter = DataPorter.newPorter();
-        Dog[] dogs = new Dog[]{porter.createBean(Dog.class), porter.createBean(Dog.class), porter.createBean(Dog.class)};
-        Dog[] newDogs = dogs.clone();
-        System.out.println(newDogs.length);
+        Dog dog = porter.createBean(Dog.class);
+        System.out.println("=== dog === " + dog);
+
+//        Dog[] dogs = new Dog[]{porter.createBean(Dog.class), porter.createBean(Dog.class), porter.createBean(Dog.class)};
+//        Dog[] newDogs = dogs.clone();
+//        System.out.println(newDogs.length);
+
+//        Dog dog = new Dog();
+//        Object o = dog;
+//        List<String> fieldNames = extractFieldNames(Dog.class);
+//        for (String fieldName : fieldNames) {
+//            if("serialVersionUID".equals(fieldName)) continue;
+//            PropertyDescriptor pd = new PropertyDescriptor(fieldName,Dog.class);
+//            Method reader = pd.getReadMethod();
+//            Object obj = reader.invoke(o);
+//            continue;
+//        }
+//        System.out.println("=== dog === " + dog);
     }
 
     public static String getParamValueFromUrl(String url, String key) {

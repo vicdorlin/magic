@@ -50,7 +50,7 @@ public class DataPorter {
      * 返回一个定制的porter
      *
      * @param clazz 传入的IDataPorterCopier具体实例类型
-     * @param <T> IDataPorterCopier接口的具体实现类
+     * @param <T>   IDataPorterCopier接口的具体实现类
      * @return 返回一个定制的porter
      */
     public static <T extends IDataPorterCopier> DataPorter newCustomizePorter(Class<T> clazz) {
@@ -398,19 +398,22 @@ public class DataPorter {
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-    public <B> Map<String, Object> transferBeanToMap(B b) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
+    public <B> Map<String, Object> transferBeanToMap(B b) {
         Map<String, Object> map = new HashMap<String, Object>();
         if (b == null) return map;
-        Class clazz = b.getClass();
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            String fieldName = field.getName();
-            if (fieldName.startsWith("serialVersionUID")) continue;
-            PropertyDescriptor descriptor = new PropertyDescriptor(fieldName, clazz);
-            Method getter = descriptor.getReadMethod();
-            Object o = getter.invoke(b);
-            if (o == null) continue;
-            map.put(fieldName, o);
+        try {
+            Class clazz = b.getClass();
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field field : fields) {
+                String fieldName = field.getName();
+                if (fieldName.startsWith("serialVersionUID")) continue;
+                PropertyDescriptor descriptor = new PropertyDescriptor(fieldName, clazz);
+                Method getter = descriptor.getReadMethod();
+                Object o = getter.invoke(b);
+                if (o == null) continue;
+                map.put(fieldName, o);
+            }
+        } catch (Exception e) {
         }
         return map;
     }
@@ -422,19 +425,22 @@ public class DataPorter {
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-    public <B> Map<String, String> transferBeanToStringMap(B b) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
+    public <B> Map<String, String> transferBeanToStringMap(B b) {
         HashMap<String, String> map = new HashMap<String, String>();
         if (b == null) return map;
-        Class clazz = b.getClass();
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            String fieldName = field.getName();
-            if (fieldName.startsWith("serialVersionUID")) continue;
-            PropertyDescriptor descriptor = new PropertyDescriptor(fieldName, clazz);
-            Method getter = descriptor.getReadMethod();
-            Object o = getter.invoke(b);
-            if (o == null) continue;
-            map.put(fieldName, transferToString(o));
+        try {
+            Class clazz = b.getClass();
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field field : fields) {
+                String fieldName = field.getName();
+                if (fieldName.startsWith("serialVersionUID")) continue;
+                PropertyDescriptor descriptor = new PropertyDescriptor(fieldName, clazz);
+                Method getter = descriptor.getReadMethod();
+                Object o = getter.invoke(b);
+                if (o == null) continue;
+                map.put(fieldName, transferToString(o));
+            }
+        } catch (Exception e) {
         }
         return map;
     }
@@ -443,6 +449,138 @@ public class DataPorter {
     public static void main(String[] args) {
         Dog dog = DataPorter.newPorter().createBean(Dog.class);
         System.out.println("===  === " + transferToString(dog));
+    }
+
+    /**
+     * 为Bean填充值
+     *
+     * @param b
+     * @param <B>
+     * @return
+     */
+    public <B> B fillInBean(B b) {
+        return fillInBean(b, true);
+    }
+
+    /**
+     * 为Bean填充值
+     *
+     * @param b
+     * @param recursionSupport
+     * @param <B>
+     * @return
+     */
+    public <B> B fillInBean(B b, boolean recursionSupport) {
+        if (b == null) return b;
+        try {
+            Class clazz = b.getClass();
+            List<String> fieldNames = extractFieldNames(clazz);
+            if (isSetEmpty(fieldNames)) return b;
+            for (String fieldName : fieldNames) {
+                PropertyDescriptor pd;
+                try {
+                    pd = new PropertyDescriptor(fieldName, clazz);
+                } catch (IntrospectionException e) {
+                    continue;
+                }
+                Method fieldReader = pd.getReadMethod();
+                Object o = fieldReader.invoke(b);
+
+                Method fieldSetter = pd.getWriteMethod();
+                String type = pd.getPropertyType().getName();
+                Object value;
+                switch (type) {
+                    case "java.lang.String":
+                        if (o != null) continue;
+                        value = RandomValue.getInstance().defaultStringValue(fieldName);
+                        break;
+                    case "long":
+                        if ((long) o != 0) continue;
+                        value = Long.valueOf(RandomValue.getInstance().getNum(1000000, 1000000000));
+                        break;
+                    case "java.lang.Long":
+                        if (o != null) continue;
+                        value = Long.valueOf(RandomValue.getInstance().getNum(1000000, 1000000000));
+                        break;
+                    case "int":
+                        if ((int) o != 0) continue;
+                        value = RandomValue.getInstance().getNum(1000, 10000);
+                        break;
+                    case "java.lang.Integer":
+                        if (o != null) continue;
+                        value = RandomValue.getInstance().getNum(1000, 10000);
+                        break;
+                    case "java.util.Date":
+                        if (o != null) continue;
+                        value = new Date();
+                        break;
+                    case "boolean":
+                        if ((boolean) o != false) continue;
+                        value = new Boolean(RandomValue.getInstance().getNum(0, 1) > 0);
+                        break;
+                    case "java.lang.Boolean":
+                        if (o != null) continue;
+                        value = new Boolean(RandomValue.getInstance().getNum(0, 1) > 0);
+                        break;
+                    case "char":
+                        if ((char) o != '\u0000') continue;
+                        value = new Character((char) (Math.random() * (Character.MAX_VALUE - Character.MIN_VALUE) + Character.MIN_VALUE));
+                        break;
+                    case "java.lang.Character":
+                        if (o != null) continue;
+                        value = new Character((char) (Math.random() * (Character.MAX_VALUE - Character.MIN_VALUE) + Character.MIN_VALUE));
+                        break;
+                    case "byte":
+                        if ((byte) o != 0) continue;
+                        value = new Byte((byte) (Math.random() * Byte.MAX_VALUE));
+                        break;
+                    case "java.lang.Byte":
+                        if (o != null) continue;
+                        value = new Byte((byte) (Math.random() * Byte.MAX_VALUE));
+                        break;
+                    case "short":
+                        if ((short) o != 0) continue;
+                        value = new Short((short) (Math.random() * Short.MAX_VALUE));
+                        break;
+                    case "java.lang.Short":
+                        if (o != null) continue;
+                        value = new Short((short) (Math.random() * Short.MAX_VALUE));
+                        break;
+                    case "double":
+                        if ((double) o != 0) continue;
+                        value = Double.valueOf(new DecimalFormat("#.00").format(new Double(Math.random() * Short.MAX_VALUE)));
+                        break;
+                    case "java.lang.Double":
+                        if (o != null) continue;
+                        value = Double.valueOf(new DecimalFormat("#.00").format(new Double(Math.random() * Short.MAX_VALUE)));
+                        break;
+                    case "float":
+                        if ((float) o != 0) continue;
+                        value = Float.valueOf(new DecimalFormat("#.00").format(new Float(Math.random() * Short.MAX_VALUE)));
+                        break;
+                    case "java.lang.Float":
+                        if (o != null) continue;
+                        value = Float.valueOf(new DecimalFormat("#.00").format(new Float(Math.random() * Short.MAX_VALUE)));
+                        break;
+                    case "java.util.List":
+                        value = null;
+                        break;
+                    default:
+                        if (recursionSupport) {
+                            if (o != null) continue;
+                            value = createBean(pd.getPropertyType(), recursionSupport);
+                        } else {
+                            value = null;
+                        }
+                        break;
+                }
+                fieldSetter.invoke(b, value);
+            }
+            return b;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -483,28 +621,26 @@ public class DataPorter {
                 Object value;
                 switch (type) {
                     case "java.lang.String":
-                        value = fieldName + "_" + (int) (Math.random() * 100000);
+                        value = RandomValue.getInstance().defaultStringValue(fieldName);
                         break;
                     case "long":
                     case "java.lang.Long":
-                        value = new Long((long) (Math.random() * Long.MAX_VALUE));
+                        value = Long.valueOf(RandomValue.getInstance().getNum(1000000, 1000000000));
                         break;
                     case "int":
                     case "java.lang.Integer":
-                        value = new Integer((int) (Math.random() * Integer.MAX_VALUE));
+                        value = RandomValue.getInstance().getNum(1000, 100000);
                         break;
                     case "java.util.Date":
                         value = new Date();
                         break;
                     case "boolean":
                     case "java.lang.Boolean":
-                        value = new Boolean((int) (Math.random() * 2) < 1);
+                        value = new Boolean(RandomValue.getInstance().getNum(0, 1) > 0);
                         break;
                     case "char":
                     case "java.lang.Character":
-                        char min = Character.MIN_VALUE;
-                        char max = Character.MAX_VALUE;
-                        value = new Character((char) (Math.random() * (max - min) + min));
+                        value = new Character((char) (Math.random() * (Character.MAX_VALUE - Character.MIN_VALUE) + Character.MIN_VALUE));
                         break;
                     case "byte":
                     case "java.lang.Byte":
@@ -523,6 +659,9 @@ public class DataPorter {
                     case "java.lang.Float":
                         value = new Float(Math.random() * Short.MAX_VALUE);
                         value = Float.valueOf(new DecimalFormat("#.00").format(value));
+                        break;
+                    case "java.util.List":
+                        value = null;
                         break;
                     default:
                         if (recursionSupport) {

@@ -134,12 +134,15 @@ public class CommonUtils {
      * @return
      */
     public static List<String> extractFieldNames(Class<?> clazz) {
-        Field[] fields = clazz.getDeclaredFields();
         List<String> fieldNames = new ArrayList<String>();
-        if (fields.length > 0) {
-            for (Field field : fields) {
-                fieldNames.add(field.getName());
+        while (clazz != null){
+            Field[] fields = clazz.getDeclaredFields();
+            if (fields.length > 0) {
+                for (Field field : fields) {
+                    fieldNames.add(field.getName());
+                }
             }
+            clazz = clazz.getSuperclass();
         }
         return fieldNames;
     }

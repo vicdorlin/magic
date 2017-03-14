@@ -3,12 +3,13 @@ package org.vic.test.domain;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author vicdor
  * @create 2016-06-06 13:59
  */
-public class Dog {
+public class Dog extends Animal{
     private static final long serialVersionUID = -1L;
 
     private String name;
@@ -28,6 +29,7 @@ public class Dog {
     private Double height;
     private Float weight;
     private Cat cat;
+    private List<Cat> cats;
 
     private boolean likeMe;
     private char hotWord;
@@ -45,6 +47,14 @@ public class Dog {
     public Dog(String name, String age) {
         this.name = name;
         this.age = age;
+    }
+
+    public List<Cat> getCats() {
+        return cats;
+    }
+
+    public void setCats(List<Cat> cats) {
+        this.cats = cats;
     }
 
     public boolean isLikeMe() {
