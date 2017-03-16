@@ -191,6 +191,18 @@ public class RandomValue {
     }
 
     /**
+     * 返回颜色
+     *
+     * @return
+     */
+    private String getColor() {
+        String r = Integer.toHexString(getNum(0, 255));
+        String g = Integer.toHexString(getNum(0, 255));
+        String b = Integer.toHexString(getNum(0, 255));
+        return "#" + (r.length() > 1 ? r : "0" + r) + (g.length() > 1 ? g : "0" + g) + (b.length() > 1 ? b : "0" + b);
+    }
+
+    /**
      * 工厂方法
      *
      * @param fieldName
@@ -204,6 +216,9 @@ public class RandomValue {
         }
         if (fieldName.contains("username")) {
             return getChineseName();
+        }
+        if (fieldName.contains("color") || fieldName.contains("colour")) {
+            return getColor();
         }
         if (fieldName.contains("tel") || fieldName.contains("mobile") || fieldName.contains("phone")) {
             return getTel();

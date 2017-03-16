@@ -548,19 +548,19 @@ public class DataPorter {
                         break;
                     case "double":
                         if ((double) o != 0) continue;
-                        value = Double.valueOf(new DecimalFormat("#.00").format(new Double(Math.random() * Short.MAX_VALUE)));
+                        value = Double.valueOf(new DecimalFormat("#.00").format(new Double(Math.random())));
                         break;
                     case "java.lang.Double":
                         if (o != null) continue;
-                        value = Double.valueOf(new DecimalFormat("#.00").format(new Double(Math.random() * Short.MAX_VALUE)));
+                        value = Double.valueOf(new DecimalFormat("#.00").format(new Double(Math.random())));
                         break;
                     case "float":
                         if ((float) o != 0) continue;
-                        value = Float.valueOf(new DecimalFormat("#.00").format(new Float(Math.random() * Short.MAX_VALUE)));
+                        value = Float.valueOf(new DecimalFormat("#.00").format(new Float(Math.random())));
                         break;
                     case "java.lang.Float":
                         if (o != null) continue;
-                        value = Float.valueOf(new DecimalFormat("#.00").format(new Float(Math.random() * Short.MAX_VALUE)));
+                        value = Float.valueOf(new DecimalFormat("#.00").format(new Float(Math.random())));
                         break;
                     case "java.util.List":
                         value = null;
@@ -652,12 +652,12 @@ public class DataPorter {
                         break;
                     case "double":
                     case "java.lang.Double":
-                        value = new Double(Math.random() * Short.MAX_VALUE);
+                        value = new Double(Math.random());
                         value = Double.valueOf(new DecimalFormat("#.00").format(value));
                         break;
                     case "float":
                     case "java.lang.Float":
-                        value = new Float(Math.random() * Short.MAX_VALUE);
+                        value = new Float(Math.random());
                         value = Float.valueOf(new DecimalFormat("#.00").format(value));
                         break;
                     case "java.util.List":
