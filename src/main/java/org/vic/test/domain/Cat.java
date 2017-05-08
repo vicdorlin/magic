@@ -11,6 +11,13 @@ public class Cat {
     private String other;
     private Integer hi;
 
+    public Cat() {
+    }
+
+    public Cat(String name) {
+        this.name = name;
+    }
+
     public Integer getHi() {
         return hi;
     }

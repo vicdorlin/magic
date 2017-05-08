@@ -17,7 +17,8 @@ public enum DateFormatEnum {
     MMDD("MMdd"),
     M_D("M-d"),
     M$D("M/d"),
-    TIME_SEQUENCE("yyyyMMddHHmmss");
+    TIME_SEQUENCE("yyyyMMddHHmmss"),
+    DF_YYYY_MM_DD_E_HH_MM("yyyy-MM-dd E HH:mm");
     private String value;
 
     private DateFormatEnum(String value) {

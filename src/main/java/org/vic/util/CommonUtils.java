@@ -3,9 +3,13 @@ package org.vic.util;
 import com.alibaba.fastjson.JSON;
 import org.vic.enums.DateFormatEnum;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -135,16 +139,34 @@ public class CommonUtils {
      */
     public static List<String> extractFieldNames(Class<?> clazz) {
         List<String> fieldNames = new ArrayList<String>();
-        while (clazz != null){
-            Field[] fields = clazz.getDeclaredFields();
-            if (fields.length > 0) {
-                for (Field field : fields) {
-                    fieldNames.add(field.getName());
+        try {
+            while (clazz != null) {
+                BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
+                PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+                for (PropertyDescriptor property : propertyDescriptors) {
+                    fieldNames.add(property.getName());
                 }
+                fieldNames.remove("class");
+                clazz = clazz.getSuperclass();
             }
-            clazz = clazz.getSuperclass();
+        } catch (IntrospectionException e) {
+            e.printStackTrace();
         }
         return fieldNames;
+    }
+
+    /**
+     * encode url
+     *
+     * @param content
+     * @return
+     */
+    public static String lightUrlEncode(String content) {
+        try {
+            return URLEncoder.encode(content, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return "";
+        }
     }
 
     /**
@@ -192,7 +214,7 @@ public class CommonUtils {
      * @param keywords the keywords
      * @return the map
      */
-    public static Map<String, Object> buildSearchMap(String... keywords) {
+    public static Map<String, Object> buildSOMap(String... keywords) {
         Map<String, Object> map = new HashMap<String, Object>();
         for (int i = 0; i < keywords.length; i += 2) {
             map.put(keywords[i], keywords[i + 1]);
@@ -201,17 +223,68 @@ public class CommonUtils {
     }
 
     /**
-     * just like {@link #buildSearchMap}
+     * just like {@link #buildSOMap}
      *
      * @param keywords the keywords
      * @return the map
      */
-    public static Map<String, String> buildTestSearchMap(String... keywords) {
+    public static Map<String, String> buildSSMap(String... keywords) {
         Map<String, String> map = new HashMap<String, String>();
         for (int i = 0; i < keywords.length; i += 2) {
             map.put(keywords[i], keywords[i + 1]);
         }
         return map;
+    }
+
+    public static Map<String, Object> transBean2Map(Object bean) {
+        if (bean == null) return null;
+        Map<String, Object> map = new HashMap<String, Object>();
+        try {
+            BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
+            PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+            for (PropertyDescriptor property : propertyDescriptors) {
+                // 得到property对应的getter方法
+                Method getter = property.getReadMethod();
+                Object value = getter.invoke(bean);
+                if (value == null) continue;
+                map.put(property.getName(), value);
+            }
+            map.remove("class");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+    // Bean --> Map 1: 利用Introspector和PropertyDescriptor 将Bean --> Map
+    public static Map<String, String> transBean2StringMap(Object bean) {
+        if (bean == null) return null;
+        Map<String, String> map = new HashMap<String, String>();
+        try {
+            BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
+            PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+            for (PropertyDescriptor property : propertyDescriptors) {
+                // 得到property对应的getter方法
+                Method getter = property.getReadMethod();
+                Object value = getter.invoke(bean);
+                if (value == null) continue;
+                map.put(property.getName(), transferToString(value));
+            }
+            map.remove("class");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+    /**
+     * 判断字符串为空
+     *
+     * @param str
+     * @return
+     */
+    public static boolean isStringEmpty(String str) {
+        return (str == null) || (str.trim().length() == 0);
     }
 
     public static void main(String[] args) {
@@ -237,7 +310,7 @@ public class CommonUtils {
 
     public static <T> Object getByFieldName(T t, String fieldName) {
         try {
-            PropertyDescriptor pd = new PropertyDescriptor(fieldName,t.getClass());
+            PropertyDescriptor pd = new PropertyDescriptor(fieldName, t.getClass());
             Method getter = pd.getReadMethod();
             return getter.invoke(t);
         } catch (Exception e) {

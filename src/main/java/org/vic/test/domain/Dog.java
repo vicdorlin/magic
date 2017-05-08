@@ -2,6 +2,7 @@ package org.vic.test.domain;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  * @author vicdor
  * @create 2016-06-06 13:59
  */
-public class Dog extends Animal{
+public class Dog extends Animal implements Serializable{
     private static final long serialVersionUID = -1L;
 
     private String name;

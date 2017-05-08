@@ -44,4 +44,18 @@ public class EnumUtils {
         }
         return null;
     }
+
+    public static <T> T getEnum(Class<T> enumClazz, String enumWord) {
+        if(enumWord != null && enumClazz.isEnum()){
+            T[] enumConstants = enumClazz.getEnumConstants();
+            for (T enumConstant : enumConstants) {
+                try {
+                    if(enumConstant.getClass().getDeclaredField(enumWord).getName().equals(enumWord)) return enumConstant;
+                } catch (NoSuchFieldException e) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
 }

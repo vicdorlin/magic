@@ -680,4 +680,15 @@ public class DataPorter {
         return null;
     }
 
+    public <T, D> T setObjField(T t, String fieldName, D value) {
+        try {
+            PropertyDescriptor pd = new PropertyDescriptor(fieldName, t.getClass());
+            Method setter = pd.getWriteMethod();
+            setter.invoke(t, value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return t;
+    }
+
 }

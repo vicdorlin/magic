@@ -6,6 +6,8 @@ import org.vic.enums.DateFormatEnum;
 
 import java.util.Date;
 
+import static org.vic.enums.DateFormatEnum.DF_YYYY_MM_DD_E_HH_MM;
+
 /**
  * 对DateTime的简单封装
  * Created by Vicdor on 2016-05-07-0007.
@@ -96,6 +98,38 @@ public class DateUtils {
     public static Date formatDate(Date date, String format) {
         String dateStr = getDateStr(date, format);
         return DateTimeFormat.forPattern(format).parseDateTime(dateStr).toDate();
+    }
+
+    /**
+     * 将时间转换为带 周几 的字符串
+     *
+     * @param date
+     * @return
+     */
+    public static String getDateStrWithWeekZhou(Date date) {
+        return getDateStr(date, DF_YYYY_MM_DD_E_HH_MM.getValue()).replace("星期", "周");
+    }
+
+    /**
+     * 将带周几的字符串转换为Date
+     *
+     * @param dateStr
+     * @return
+     */
+    public static Date getDateByWeekZhou(String dateStr) {
+        return getDateTime(dateStr.replace(" 周", ""), DF_YYYY_MM_DD_E_HH_MM.getValue()).toDate();
+    }
+
+    /**
+     * 获取剩余时长
+     *
+     * @param from
+     * @param to
+     * @return
+     */
+    public static long getSecondsLeft(Date from, Date to) {
+        long gap = (to.getTime() - from.getTime()) / 1000;
+        return gap > 0 ? gap : 0;
     }
 
 }
