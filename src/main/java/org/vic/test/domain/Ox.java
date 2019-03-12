@@ -4,13 +4,15 @@ package org.vic.test.domain;
  * @author vicdor
  * @create 2016-08-02 21:15
  */
-public class Ox {
-    private String name;
+public abstract class Ox {
+    private String name = backName();
     private Integer age;
     private Sheep2 baby;
 
     public Ox() {
     }
+
+    public abstract String backName();
 
     public Ox(String name, Integer age) {
         this.name = name;
@@ -19,8 +21,8 @@ public class Ox {
 
     @Override
     public boolean equals(Object obj) {
-        if(super.equals(obj)) return true;
-        if(obj instanceof  Ox){
+        if (super.equals(obj)) return true;
+        if (obj instanceof Ox) {
             return this.name.equals(((Ox) obj).getName());
         }
         return false;

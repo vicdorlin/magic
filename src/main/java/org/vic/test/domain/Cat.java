@@ -14,6 +14,11 @@ public class Cat {
     public Cat() {
     }
 
+    public Cat(Dog dog) {
+        this.name = dog.getName();
+        this.age = Integer.valueOf(dog.getAge());
+    }
+
     public Cat(String name) {
         this.name = name;
     }

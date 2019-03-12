@@ -28,5 +28,4 @@ public enum DateFormatEnum {
     public String getValue() {
         return value;
     }
-
 }

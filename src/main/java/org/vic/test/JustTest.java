@@ -1,8 +1,11 @@
 package org.vic.test;
 
+import org.vic.test.domain.Animal;
 import org.vic.test.domain.Dog;
+import org.vic.util.MD5Util;
 
 import java.beans.IntrospectionException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
@@ -13,12 +16,16 @@ import static org.vic.util.CommonUtils.*;
  * @create 2016-12-01 15:18
  */
 public class JustTest {
-    public static void main(String[] args) throws IntrospectionException, InvocationTargetException, IllegalAccessException {
+    public static void main(String[] args) throws IntrospectionException, InvocationTargetException, IllegalAccessException, IOException {
+
+        /*OldOx ox = new OldOx();
+
+        System.out.println("===  === " + "nos_sas".indexOf("os_"));
 
         String reg = "(^[1-9]\\d*$)|(^([1-9]\\d*))";//不能以0开头
 
         String reg2 = "^\\s{0,}[\\S]{1,}[\\s\\S]{0,}";//非空
-        System.out.println("===  === " + "      ".matches(reg2));
+        System.out.println("===  === " + "      ".matches(reg2));*/
 
         /*String s = "0.00";
         DecimalFormat dFormat = new DecimalFormat(s);
@@ -109,7 +116,7 @@ public class JustTest {
 //        System.out.println("=== dog === " + dog);
 
 //        System.out.println("===  === " + JSON.parseObject("[]"));
-        Map<String, String> map = new HashMap<>();
+        /*Map<String, String> map = new HashMap<>();
         map.put("url", "http://www.baidu.com?name=历史");
         map.put("rewardId", "213_1");
         map.put("title", "我了个大曹");
@@ -123,7 +130,254 @@ public class JustTest {
         System.out.println("===  === " + transBean2StringMap(dog));
 
         List<String> fieldNames = extractFieldNames(Dog.class);
-        System.out.println("===  === " + fieldNames);
+        System.out.println("===  === " + fieldNames);*/
+
+//        String sa = "s000k@ion111@sja";
+////        String[] s = sa.split("@",4);
+//        sa = sa.replaceAll("[^10]","1");
+//        System.out.println("===  === " + sa);
+
+//        DateTime dateTime = new DateTime(new Date());
+
+        /*DateTime dateTime = new DateTime(2017,8,10,10,10);
+        dateTime = dateTime.dayOfWeek().addToCopy(1-dateTime.getDayOfWeek());
+        System.out.println("===  === " + dateTime.getDayOfWeek());
+        for (int i = 1; i <= 16; i++) {
+            System.out.println("===  === " + i+"周");
+            System.out.println("===  === " + "第一学期第"+i+"周");
+            System.out.println("===  === " + dateTime.getMonthOfYear());
+            System.out.println("-------- ");
+            dateTime = dateTime.dayOfYear().addToCopy(7);
+        }*/
+
+        /*byte hh = 1;
+        switch (hh) {
+            case 1:
+                System.out.println("===  === " + 2);
+                break;
+            default:
+                System.out.println("===  === " + 1);
+                break;
+        }
+        String re = "(^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$)|(^[1-9]\\d{5}\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{2}[0-9Xx]$)";
+        System.out.println("===  === " + "330382199107088718".matches(re));*/
+
+        /*Map<String,String> map = new HashMap<>();
+        map.put("ss","hy");
+        System.out.println("===  === " + getDog(map).getName());
+        List<String> list = new ArrayList<>();
+        list.add("22");
+        list.add("222");
+        list.add("233");
+        List<String> list1 = new ArrayList<>();
+        list1.add("21");
+        list1.add("233");
+        list.removeAll(list1);
+        System.out.println("===  === " + list.size());
+        System.out.println("===  === " + list.get(0));
+        list.clear();
+        System.out.println("===  === " + list.size());*/
+
+//        StringBuilder sb = new StringBuilder();
+//        sb.append(",123");
+//        sb.append(",333");
+//        sb.deleteCharAt(0);
+//        System.out.println("===  === " + sb.toString());
+
+       /* StringBuilder builder = new StringBuilder();
+        builder.append(",");
+        builder.append("jjjj");
+        builder.append("kkk");
+        builder.deleteCharAt(0);
+        System.out.println("===  === " + builder.toString());
+        Dog dog = new Dog();
+        dog.setName("dd");
+        dog.setAge("2");
+        dog.setColor("gr");
+        String jsonDog = JSON.toJSONString(dog);
+        Cat cat = JSON.toJavaObject(JSON.parseObject(jsonDog),Cat.class);
+        System.out.println("===  === " + cat);*/
+
+        /*List<Dog> list = new ArrayList<>();
+        list.add(new Dog("haha","12"));
+        list.add(new Dog("dd","5"));
+        list.add(new Dog("sksk","22"));
+        Dog dog = list.get(1);
+        dog.setName("hhha");
+        Dog inx = new Dog("sksk","99");
+        System.out.println("===  === " + list.get(1));*/
+//        String data = "[\"20\",\"33\"]";
+//        List<Integer> keys = JSON.toJavaObject(JSON.parseArray(data), List.class);
+//        StringBuilder builder = new StringBuilder("skk");
+//        builder = builder.append("kklllll");
+//        System.out.println("===  === " + builder.toString());
+
+//        String jj = "j";
+//        heeh(jj);
+//        System.out.println("===  === " + jj);
+
+//        System.out.println("=== version check === " + compareVersion("1.3.20", "2.2.1223"));
+/*
+        IPorter<Dog,Cat> porter = new DogPotter();
+        Cat cat = porter.transferF2T(new Dog("旺旺","3"));
+        System.out.println("===  === " + cat);*/
+
+        /*Teleporter<Dog,Cat> porter2 = Teleporter.newTeleporter();
+        Cat cat = porter2.copyData(new Dog("旺旺","3"),new DogPotter());
+        Cat cat1 = porter2.copyData(new Dog("hah", "1"), new IPorter<Dog, Cat>() {
+            @Override
+            public Cat transferF2T(Dog dog) {
+                Cat cat = new Cat(dog);
+                cat.setHi(233);
+                return cat;
+            }
+        });
+        Cat cat2 = porter2.copyData(new Dog("jjjj","2"),(dog) -> {
+            Cat c = new Cat(dog);
+            c.setOther("haha");
+            return c;
+        });
+        System.out.println("===  === " + cat);*/
+
+        /*Dog dog = new Dog();
+        dog.setColor("red");
+        dog.setCool(true);
+        dog.setMyAge(2);*/
+//        Animal animal = new JustTest().doWithAnimal(dog);
+        /*long now = System.currentTimeMillis();
+        Date date = new Date();
+        long time = date.getTime();*/
+        /*int a = 3;
+        int b = 5;
+        a = a ^ b;
+        b = a ^ b;
+        a = a ^ b;
+
+        System.out.println("a=" + a + ",b=" + b);
+        ESex sex = ESex.male;
+        ESex sex1 = ESex.male;
+        System.out.println("===  === " + (sex == sex1));*/
+        /*String aa = "http://baidu.com.www.ok{3223}jkl{232}sk78kk,{987}ii65";
+        String reg = "(\\{[^{}]*\\})+";
+        String[] as = aa.split(reg);
+        System.out.println("===  === " + 1);*/
+        /*String word = "sk,al";
+        String w[] = word.split(",");
+        System.out.println(w);*/
+
+        /*List<Dog> list1 = new ArrayList<>();
+        list1.add(new Dog("kk","12"));
+        list1.add(new Dog("mm","11"));
+        list1.add(new Dog("kj","12"));
+        list1.add(new Dog("mm","12"));
+
+        Iterator<Dog> iterator = list1.iterator();
+        while (iterator.hasNext()){
+            Dog dog = iterator.next();
+            if(dog.getName() == "mm") iterator.remove();
+        }
+
+
+        Set<Dog> set = new HashSet<>(list1);
+
+        List<Dog> list2 = new ArrayList<>();
+        list2.add(new Dog("mm","22"));
+        list2.add(new Dog("kj","1"));
+        list1.removeAll(list2);
+        System.out.println();*/
+
+//        String word = "我爱#￥赵，欣,哈哈haha my wife 。123";
+////        String rex = "[^\\dA-Za-z\\u3007\\u3400-\\u4DB5\\u4E00-\\u9FCB\\uE815-\\uE864]";
+
+//        String word = "序列号:191766     验证码:124572";
+//        String rex = "[\\s]+";
+//        String[] list = word.split(rex);
+
+//        String code = "1212766 |1252372";
+        /*String name = "序列号|验证码";
+        String[] codes = code.split("[|]");
+        String[] names = name.split("[|]");
+        for (int i = 0; i < 2; i++) {
+            System.out.println((codes[i]));
+            System.out.println((names[i]));
+        }*/
+//        String val = code;
+//        code = code.replace("66", "99");
+//        System.out.println(val + "  " + code);
+//        File file = new File("D://eula.2052.txt");
+//        System.out.println(file.getAbsoluteFile());
+//        System.out.println(file.getAbsolutePath());
+//        insert("D://test.csv", 0, "key1,key2,key3,key4\n");
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < 20000; i++) {
+            list.add("\"1232skkl29993k\"");
+        }
+        String word = list.get(1);
+        long time1 = System.currentTimeMillis();
+        System.out.println(MD5Util.getMD5(word));
+        long time2 = System.currentTimeMillis();;
+        System.out.println(time2 - time1);
+        System.out.println(word);
+    }
+
+    public static void insert(String filename, int pos, String insertContent) throws IOException {//pos是插入的位置
+        File tmp = File.createTempFile("tmp", null);
+        tmp.deleteOnExit();
+        RandomAccessFile raf = new RandomAccessFile(filename, "rw");
+        FileOutputStream tmpOut = new FileOutputStream(tmp);
+        FileInputStream tmpIn = new FileInputStream(tmp);
+        raf.seek(pos);//首先的话是0
+        byte[] buf = new byte[64];
+        int hasRead = 0;
+        while ((hasRead = raf.read(buf)) > 0) {
+            //把原有内容读入临时文件
+            tmpOut.write(buf, 0, hasRead);
+
+        }
+        raf.seek(pos);
+        raf.write(insertContent.getBytes());
+        //追加临时文件的内容
+        while ((hasRead = tmpIn.read(buf)) > 0) {
+            raf.write(buf, 0, hasRead);
+        }
+    }
+
+    public Animal doWithAnimal(Animal animal) {
+        animal.setLegNum("12");
+        return animal;
+    }
+
+    /**
+     * 比较版本号的大小,前者大则返回一个正数,后者大返回一个负数,相等则返回0
+     *
+     * @param version1
+     * @param version2
+     */
+    public static int compareVersion(String version1, String version2) {
+        String[] versionArray1 = version1.split("\\.");//注意此处为正则匹配，不能用.；
+        String[] versionArray2 = version2.split("\\.");
+        int idx = 0;
+        int minLength = Math.min(versionArray1.length, versionArray2.length);//取最小长度值
+        int diff = 0;
+        while (idx < minLength
+                && (diff = versionArray1[idx].length() - versionArray2[idx].length()) == 0//先比较长度
+                && (diff = versionArray1[idx].compareTo(versionArray2[idx])) == 0) {//再比较字符
+            ++idx;
+        }
+        //如果已经分出大小，则直接返回，如果未分出大小，则再比较位数，有子版本的为大；
+        diff = (diff != 0) ? diff : versionArray1.length - versionArray2.length;
+        return diff;
+    }
+
+    public static void heeh(String bool) {
+        bool = "skkk";
+    }
+
+    public static Dog getDog(Map<String, String> map) {
+        Dog dog = new Dog();
+        dog.setName(map.get("ss"));
+        map.clear();
+        return dog;
     }
 
     public static String addUrlParam(String url, Object bean) {
@@ -258,4 +512,41 @@ public class JustTest {
     public static void testBool(Boolean haha) {
         haha = true;
     }
+
+
+
+    /*public static String calculateSign(Map<String, String> map) {
+        String result = "";
+        try {
+            List<Map.Entry<String, String>> infoIds = new ArrayList<Map.Entry<String, String>>(map.entrySet());
+            // 对所有传入参数按照字段名的 ASCII 码从小到大排序（字典序）
+            Collections.sort(infoIds, new Comparator<Map.Entry<String, String>>() {
+
+                public int compare(Map.Entry<String, String> o1, Map.Entry<String, String> o2) {
+                    return (o1.getKey()).toString().compareTo(o2.getKey());
+                }
+            });
+
+            // 构造签名键值对的格式
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, String> item : infoIds) {
+                if (item != null) {
+                    String key = item.getKey();
+                    String val = item.getValue();
+                    if (exist(key) && exist(val) && !"sign".equals(key)) {
+                        sb.append(key + "=" + val + "&");
+                    }
+                }
+            }
+//            sb.append("key=" + Config.getString("qmm.key"));
+            sb.append("key=" + "7sERsqfBD^Y8eyrUixJ7W!MY1MeT$pY7");
+            result = sb.toString();
+
+            //进行MD5加密
+            result = DigestUtils.md5Hex(result);
+        } catch (Exception e) {
+            return null;
+        }
+        return result;
+    }*/
 }

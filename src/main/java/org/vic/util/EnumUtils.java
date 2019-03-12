@@ -1,6 +1,8 @@
 package org.vic.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Created by Vicdor on 2016-05-07-0007.
@@ -57,5 +59,67 @@ public class EnumUtils {
             }
         }
         return null;
+    }
+
+    public static String toJson(Enum<?>[] enumValues) throws IllegalAccessException, InvocationTargetException {
+        StringBuffer buffer=new StringBuffer("[");
+        boolean obj1st=true;
+        for (Object obj : enumValues) {
+            if(obj1st){
+                obj1st=false;
+            }else{
+                buffer.append(",");
+            }
+            buffer.append("{");
+
+            Method[] methods = obj.getClass().getMethods();
+            boolean method1st=true;
+            for (int i = 0; i < methods.length; i++) {
+
+                Method method = methods[i];
+                //获取枚举值的get方法
+                if (method.getName().startsWith("get") && method.getParameterTypes().length == 0 && !method.getName().contains("Class")) {
+                    //处理逗号
+                    if(method1st){
+                        method1st=false;
+                    }else{
+                        buffer.append(",");
+                    }
+                    //将get方法的get去掉,并且首字母小写
+                    String name = method.getName().replace("get","");
+                    buffer.append("\"" + name.substring(0, 1).toLowerCase() + name.substring(1) + "\":\"");
+                    buffer.append(method.invoke(obj)+"\"");
+                }
+            }
+            buffer.append("}");
+        }
+        buffer.append("]");
+        return buffer.toString();
+    }
+
+    public static String toJson(Enum enumValue) throws IllegalAccessException, InvocationTargetException {
+        StringBuffer buffer=new StringBuffer("{");
+
+        Method[] methods = enumValue.getClass().getMethods();
+        boolean method1st=true;
+        for (int i = 0; i < methods.length; i++) {
+
+            Method method = methods[i];
+            //获取枚举值的get方法
+            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0 && !method.getName().contains("Class")) {
+                //处理逗号
+                if(method1st){
+                    method1st=false;
+                }else{
+                    buffer.append(",");
+                }
+                //将get方法的get去掉,并且首字母小写
+                String name = method.getName().replace("get","");
+                buffer.append("\"" + name.substring(0, 1).toLowerCase() + name.substring(1) + "\":\"");
+                buffer.append(method.invoke(enumValue)+"\"");
+            }
+        }
+        buffer.append("}");
+        return buffer.toString();
     }
 }

@@ -40,14 +40,42 @@ public class Dog extends Animal implements Serializable{
     private double heg;
     private short sht;
     private byte bte;
+    private int doubleMyAge;
 
+    public int getDoubleMyAge() {
+        return 2 * myAge;
+    }
+
+    public void setDoubleMyAge(int doubleMyAge) {
+        this.doubleMyAge = doubleMyAge;
+    }
 
     public Dog() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Dog dog = (Dog) o;
+
+        return name != null ? name.equals(dog.name) : dog.name == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
     }
 
     public Dog(String name, String age) {
         this.name = name;
         this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return this.name;
     }
 
     public List<Cat> getCats() {
